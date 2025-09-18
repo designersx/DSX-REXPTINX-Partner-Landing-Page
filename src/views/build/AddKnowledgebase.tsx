@@ -18,10 +18,11 @@ import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import {toast,ToastContainer} from "react-toastify"
 // project-imports
 import MainCard from 'components/MainCard';
-import { listSiteMap, validateWebsite } from '../../../Services/auth';
+import { AddKB, listSiteMap, validateWebsite } from '../../../Services/auth';
+import { getUserId } from 'utils/auth';
 
 export default function BasicModal({ open, onClose, onSubmit }) {
   const [step, setStep] = useState(1);
@@ -37,13 +38,54 @@ export default function BasicModal({ open, onClose, onSubmit }) {
   const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set());
   const [errors, setErrors] = useState({ Website: '' });
   const [hasNoWebsite, setHasNoWebsite] = useState(false);
-  
+  const userId = getUserId();
   const HTTPS_PREFIX = "https://";
   const PREFIX_LEN = HTTPS_PREFIX.length;
 
-  const handleFileChange = (e) => {
-    setFiles(Array.from(e.target.files));
-  };
+  // const handleFileChange = (e) => {
+  //   setFiles(Array.from(e.target.files));
+  // };
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const selectedFiles = Array.from(e.target.files || []);
+
+  const allowedTypes = [
+    "image/png",
+    "image/jpeg",
+    "application/pdf",
+    "text/csv",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  const validFiles: File[] = [];
+  const errors: string[] = [];
+
+  selectedFiles.forEach((file) => {
+    if (!allowedTypes.includes(file.type)) {
+      errors.push(`${file.name} is not an allowed file type.`);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      errors.push(`${file.name} exceeds 10MB.`);
+      return;
+    }
+    validFiles.push(file);
+  });
+
+  if (errors.length > 0) {
+    alert(errors.join("\n")); // Sirf error files ke liye alert
+  }
+
+  // Sirf valid files hi set karenge
+  setFiles(validFiles);
+
+  // Agar koi valid file nahi hai to input ka value reset karein
+  if (validFiles.length === 0) {
+    e.target.value = "";
+  }
+};
+
+
 
   const verifyWebsite = async (rawUrl) => {
     const urlToVerify = rawUrl || (formData.website || "").trim();
@@ -130,16 +172,47 @@ export default function BasicModal({ open, onClose, onSubmit }) {
     return urls.filter((url) => companyKeywords.some((keyword) => url.toLowerCase().includes(keyword)));
   };
 
-  const handleSubmit = () => {
-    const data = { 
-      kbName, 
-      files, 
-      text, 
-      url: formData.website,
-      selectedSitemapUrls: Array.from(selectedUrls)
-    };
-    if (onSubmit) onSubmit(data);
-    handleClose();
+  const handleSubmit =async() => {
+    // const data = { 
+    //   kbName, 
+    //   files, 
+    //   text, 
+    //   url: formData.website,
+    //   selectedSitemapUrls: Array.from(selectedUrls)
+    // };
+    // console.log(data)
+  const formDataObj = new FormData();
+  formDataObj.append("userId", userId);
+  formDataObj.append("kbName", kbName);
+  formDataObj.append("text", text);
+  formDataObj.append("url", formData.website);
+  formDataObj.append("selectedSitemapUrls", JSON.stringify(Array.from(selectedUrls)));
+
+  files.forEach((file) => {
+    formDataObj.append("KbFiles", file);
+  });
+
+  try {
+    const res = await AddKB(formDataObj)
+   toast.success("Knowldgebase Added!", {
+  position: "top-center",
+  autoClose: 2000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+});
+    console.log("Saved:", res.data);
+    setTimeout(() => {
+        handleClose();
+    }, 2000);
+ 
+  } catch (err) {
+    console.error("Error:", err);
+  }
+    
+    // if (onSubmit) onSubmit(data);
+    
   };
 
   const handleWebsiteBlur = () => {
@@ -216,17 +289,36 @@ export default function BasicModal({ open, onClose, onSubmit }) {
           {step === 2 && (
             <>
               {/* File Upload */}
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Upload Files
-                </Typography>
-                <input type="file" multiple onChange={handleFileChange} />
-                {files.length > 0 && (
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    {files.length} file(s) selected
-                  </Typography>
-                )}
-              </Box>
+           <Box sx={{ mb: 2 }}>
+  <Typography variant="subtitle2" gutterBottom>
+    Upload Files
+  </Typography>
+
+  <input
+    type="file"
+    multiple
+    accept=".png,.jpg,.jpeg,.pdf,.csv,.docx"
+    onChange={handleFileChange}
+  />
+
+  <Typography
+    variant="caption"
+    sx={{ display: "block", mt: 1, color: "text.secondary" }}
+  >
+    Max 10MB per file. Allowed: PNG, JPG, PDF, CSV, DOCX
+  </Typography>
+
+  {files.length > 0 ? (
+  <Typography variant="body2" sx={{ mt: 1 }}>
+    {files.map((file) => file.name).join(", ")}
+  </Typography>
+) : (
+  <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
+    No file chosen
+  </Typography>
+)}
+</Box>
+
 
               {/* Text Input */}
               <Box sx={{ mb: 2 }}>
@@ -384,7 +476,14 @@ export default function BasicModal({ open, onClose, onSubmit }) {
             </Button>
           )}
         </Stack>
+        <ToastContainer
+  position="bottom-right"
+  autoClose={3000}
+  newestOnTop={false}
+  closeButton={true}
+/>
       </MainCard>
+       
     </Modal>
   );
 }
