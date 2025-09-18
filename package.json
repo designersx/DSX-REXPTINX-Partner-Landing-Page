@@ -1,5 +1,5 @@
 {
-  "name": "able-pro-material-next-ts",
+  "name": "Rexpt Enterprise",
   "version": "4.0.0",
   "author": {
     "name": "Rexpt",
@@ -8,9 +8,7 @@
   },
   "private": true,
   "scripts": {
-
     "dev": "next dev -p 4006",
-
     "build": "next build",
     "start": "next start",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
@@ -28,8 +26,8 @@
     "@mui/system": "7.1.1",
     "@wandersonalwes/iconsax-react": "0.0.10",
     "axios": "1.10.0",
-   
-  
+    "formik": "^2.4.6",
+    "framer-motion": "^12.23.14",
     "history": "5.3.0",
     "jwt-decode": "^4.0.0",
     "lodash-es": "4.17.21",

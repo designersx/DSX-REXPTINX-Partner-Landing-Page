@@ -650,13 +650,13 @@ const languages = [
     percentage: "5.90%",
     stats: "484 million native speakers",
   },
-  {
-    name: "Spanish (LatAm)",
-    locale: "es-419",
-    flag: "/images/es-ES.png",
-    percentage: "5.90%",
-    stats: "484 million native speakers",
-  },
+  // {
+  //   name: "Spanish (LatAm)",
+  //   locale: "es-419",
+  //   flag: "/images/es-ES.png",
+  //   percentage: "5.90%",
+  //   stats: "484 million native speakers",
+  // },
   {
     name: "French (France)",
     locale: "fr-FR",
@@ -830,7 +830,9 @@ export default function AgentGeneralInfo() {
     agentGender: "",
     agentAvatar: "",
     agentLanguage: "",
+    agentLanguageCode: "",
     agentVoice: "",
+    customServices: [''],
   });
 
   const [errors, setErrors] = useState({});
@@ -840,6 +842,7 @@ export default function AgentGeneralInfo() {
   const [playingVoiceId, setPlayingVoiceId] = useState(null);
   const [audio, setAudio] = useState(null); // Track current audio instance
   const audioRef = useRef(null);
+  const [filteredVoices, setFilteredVoices] = useState([]);
 
   const purposes = [
     "Customer Support",
@@ -865,20 +868,32 @@ export default function AgentGeneralInfo() {
     <path d="M8 5v14l11-7z" />
   </svg>
 );
+useEffect(() => {
+  if (voices && formData.agentGender) {
+    const filtered = voices.filter(
+      (voice) =>
+        voice.provider === "elevenlabs" &&
+        voice?.gender?.toLocaleLowerCase() === formData?.agentGender?.toLocaleLowerCase()
+    );
+    setFilteredVoices(filtered||[])
+  }
+}, [formData.agentGender, voices]);
+  
   // Fetch voices when gender or language changes
  useEffect(() => {
     if (formData.agentGender && formData.agentLanguage) {
       const fetchVoices = async () => {
         try {
           const response = await axios.get(
-            `http://192.168.0.202:2512/api/enterprise/fetchAgentVoiceDetailsFromRetell2`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/enterprise/fetchAgentVoiceDetailsFromRetell2`,
             {
               headers: {
                 'Content-Type': 'application/json',
               },
             }
           );
-          setVoices(response.data || []);
+          // console.log(response?.data)
+          setVoices(response?.data || []);
           setApiStatus({ status: 'success', message: '' });
         } catch (error) {
           setVoices([]);
@@ -891,6 +906,7 @@ export default function AgentGeneralInfo() {
       setApiStatus({ status: null, message: '' });
     }
   }, [formData.agentGender, formData.agentLanguage]);
+
   const handlePlayVoice = (voiceId, audioUrl) => {
     if (playingVoiceId === voiceId) {
       // Pause if the same voice is playing
@@ -932,6 +948,46 @@ export default function AgentGeneralInfo() {
   // };
 
   // Clean up audio on component unmount
+  const handleCustomServiceChange = (event, index) => {
+  const newCustomServices = [...formData.customServices];
+  newCustomServices[index] = event.target.value;
+  setFormData({ ...formData, customServices: newCustomServices });
+
+  // Update errors
+  const newErrors = [...errors.customServices];
+  newErrors[index] = validateCustomService(event.target.value);
+  setErrors({ ...errors, customServices: newErrors });
+};
+
+const handleAddCustomService = () => {
+  setFormData({
+    ...formData,
+    customServices: [...formData.customServices, '']
+  });
+  setErrors({
+    ...errors,
+    customServices: Array.isArray(errors.customServices)
+      ? [...errors.customServices, '']
+      : ['']
+  });
+};
+
+const handleRemoveCustomService = (index) => {
+  const newCustomServices = formData.customServices.filter((_, i) => i !== index);
+  const newErrors = Array.isArray(errors.customServices)
+    ? errors.customServices.filter((_, i) => i !== index)
+    : new Array(formData.customServices.length - 1).fill('');
+  setFormData({ ...formData, customServices: newCustomServices });
+  setErrors({ ...errors, dashboards: newErrors });
+};
+
+// Example validation function (adjust as needed)
+const validatedashboard = (value) => {
+  if (!value.trim()) {
+    return 'Custom service is required';
+  }
+  return '';
+};
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -942,23 +998,43 @@ export default function AgentGeneralInfo() {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
+
+  if (name === "agentLanguage") {
+    const selectedLang = languages.find((lang) => lang.locale === value);
+
+    setFormData({
+      ...formData,
+      agentLanguage: selectedLang?.name || "",       // store readable name
+      agentLanguageCode: selectedLang?.locale || "", // store locale
+      agentVoice: "", // reset voice if language changes
+    });
+  } else {
     setFormData({
       ...formData,
       [name]: value,
       ...(name === "agentGender" ? { agentAvatar: "", agentVoice: "" } : {}),
-      ...(name === "agentLanguage" ? { agentVoice: "" } : {}),
     });
-  };
+  }
+};
 
-  const handleServiceChange = (e) => {
-    const { value } = e.target;
-    setFormData({
-      ...formData,
-      service: value,
-      customService: value.includes("Other") ? formData.customService : "",
-    });
-  };
+
+  const handleServiceChange = (event) => {
+  const value = event.target.value;
+  setFormData({
+    ...formData,
+    service: value,
+    // Clear custom services if "Other" is deselected
+    customServices: value.includes('Other') ? formData.customServices : ['']
+  });
+
+  // Update errors
+  setErrors({
+    ...errors,
+    service: value.length === 0 ? 'At least one service is required' : '',
+    customServices: value.includes('Other') ? formData.customServices.map(validateCustomService) : []
+  });
+};
 
   const handleAvatarSelect = (avatarImg) => {
     setFormData({
@@ -978,8 +1054,8 @@ export default function AgentGeneralInfo() {
       if (!formData.industry) newErrors.industry = "Industry is required";
       if (formData.service.length === 0)
         newErrors.service = "At least one Business Service/Product is required";
-      if (formData.service.includes("Other") && !formData.customService) {
-        newErrors.customService = "Please specify your service";
+      if (formData.service.includes("Other") && !formData.customServices) {
+        newErrors.customServices = "Please specify your service";
       }
     } else if (step === 2) {
       if (!formData.agentType) newErrors.agentType = "Agent Type is required";
@@ -1002,14 +1078,12 @@ export default function AgentGeneralInfo() {
 
       try {
         setApiStatus({ status: null, message: null });
-        const response = await fetch(
-          `http://localhost:2512/api/enterprise/Enterprise/createagent`,
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/enterprise/createEnterpriseAgent`,finalData,
           {
-            method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(finalData),
           }
         );
 
@@ -1038,7 +1112,6 @@ export default function AgentGeneralInfo() {
       }
     }
   };
-
   const handleBack = () => {
     setActiveStep((prev) => prev - 1);
     setErrors({});
@@ -1156,7 +1229,7 @@ export default function AgentGeneralInfo() {
                     ...formData,
                     industry: e.target.value,
                     service: [],
-                    customService: "",
+                    customServices: "",
                   });
                 }}
                 error={!!errors.industry}
@@ -1197,47 +1270,67 @@ export default function AgentGeneralInfo() {
             </Stack>
 
             {/* Business Service/Product */}
-            <Stack spacing={1}>
-              <InputLabel>Business Services/Products</InputLabel>
-              <Select
-                multiple
-                name="service"
-                value={formData.service}
-                onChange={handleServiceChange}
-                error={!!errors.service}
-                disabled={!formData.industry}
-                renderValue={(selected) => (
-                  <Stack direction="row" spacing={1} flexWrap="wrap">
-                    {selected.map((value) => (
-                      <Chip key={value} label={value} />
-                    ))}
-                  </Stack>
-                )}
-                fullWidth
-              >
-                {getServicesByType(formData.industry).map((s) => (
-                  <MenuItem key={s} value={s}>
-                    {s}
-                  </MenuItem>
-                ))}
-              </Select>
-              <FormHelperText error>{errors.service}</FormHelperText>
+           <Stack spacing={1}>
+  <InputLabel>Business Services/Products</InputLabel>
+  <Select
+    multiple
+    name="service"
+    value={formData.service}
+    onChange={handleServiceChange}
+    error={!!errors.service}
+    disabled={!formData.industry}
+    renderValue={(selected) => (
+      <Stack direction="row" spacing={1} flexWrap="wrap">
+        {selected.map((value) => (
+          <Chip key={value} label={value} />
+        ))}
+      </Stack>
+    )}
+    fullWidth
+  >
+    {getServicesByType(formData.industry).map((s) => (
+      <MenuItem key={s} value={s}>
+        {s}
+      </MenuItem>
+    ))}
+  </Select>
+  <FormHelperText error>{errors.service}</FormHelperText>
 
-              {/* Custom service if "Other" is selected */}
-              {formData.service.includes("Other") && (
-                <TextField
-                  fullWidth
-                  name="customService"
-                  placeholder="Enter your custom service"
-                  value={formData.customService}
-                  onChange={handleChange}
-                  error={!!errors.customService}
-                  helperText={errors.customService}
-                  sx={{ mt: 1 }}
-                />
-              )}
-            </Stack>
-
+  {/* Custom services when "Other" is selected */}
+  {formData.service.includes("Other") && (
+    <Stack spacing={1} sx={{ mt: 1 }}>
+      {formData.customServices.map((customService, index) => (
+        <Stack key={index} direction="row" spacing={1} alignItems="center">
+          <TextField
+            fullWidth
+            name={`customService_${index}`}
+            placeholder="Enter your custom service"
+            value={customService}
+            onChange={(e) => handleCustomServiceChange(e, index)}
+            error={!!errors.customServices?.[index]}
+            helperText={errors.customServices?.[index]}
+          />
+          {index > 0 && (
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => handleRemoveCustomService(index)}
+            >
+              Remove
+            </Button>
+          )}
+        </Stack>
+      ))}
+      <Button
+        variant="contained"
+        onClick={handleAddCustomService}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Add Another Service
+      </Button>
+    </Stack>
+  )}
+</Stack>
             {/* Business Name (Optional) */}
             <Stack spacing={1}>
               <InputLabel>Business Name</InputLabel>
@@ -1274,40 +1367,26 @@ export default function AgentGeneralInfo() {
             </Stack>
 
             {/* Agent Language */}
-            <Stack spacing={1}>
-              <InputLabel>Agent Language</InputLabel>
-              
-              <Select
-                name="agentLanguage"
-                value={formData.agentLanguage}
-                onChange={handleChange}
-                error={!!errors.agentLanguage}
-                fullWidth
-              >
-                {languages.map((lang) => (
-                  <MenuItem key={lang.locale} value={lang.locale}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                    
-                      <img
-                        src={`https://flagcdn.com/w20/${lang.locale.split("-")[1]?.toLowerCase() || "us"
-                          }.png`}
-                        alt="flag"
-                        className="w-5 h-5"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          if (lang.locale == "es-419") {
-                            target.src = "https://flagcdn.com/w80/es.png"; // Fallback
-                          }
-                        }}
-                      />
-                     
-                      <Typography>{lang.name}</Typography>
-                    </Stack>
-                  </MenuItem>
-                ))}
-              </Select>
-              <FormHelperText error>{errors.agentLanguage}</FormHelperText>
-            </Stack>
+            <Select
+  name="agentLanguage"
+  value={formData.agentLanguageCode || ""}
+  onChange={handleChange}
+  error={!!errors.agentLanguage}
+  fullWidth
+>
+  {
+  languages.map((lang) => (
+    <MenuItem key={lang.locale} value={lang.locale}>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <img src={`https://flagcdn.com/w20/${lang.locale.split("-")[1]?.toLowerCase() || "us" }.png`} 
+        alt="flag" className="w-5 h-5" onError={(e) => { const target = e.target as HTMLImageElement; 
+        if (lang.locale == "es-419") { target.src = "https://flagcdn.com/w80/es.png";} }} />
+        <Typography>{lang.name}</Typography>
+      </Stack>
+    </MenuItem>
+  ))}
+</Select>
+
 
             {/* Agent Voice */}
         <Stack spacing={1}>
@@ -1320,7 +1399,7 @@ export default function AgentGeneralInfo() {
         disabled={!formData.agentGender || !formData.agentLanguage || voices.length === 0}
         fullWidth
       >
-        {voices.map((voice) => (
+        {filteredVoices?.map((voice) => (
           <MenuItem key={voice.voice_id} value={voice.voice_id}>
             <Stack
               direction="row"
@@ -1416,7 +1495,7 @@ export default function AgentGeneralInfo() {
             <Button
               variant="contained"
               onClick={handleNext}
-              disabled={apiStatus.status === "success"}
+              // disabled={}
               sx={{
                 px: 4,
                 py: 1,
