@@ -18,3 +18,35 @@ export const Login = async (email, password) => {
       
     }
 };
+
+export const listSiteMap = async (url) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/map/list-sitemap`,
+      { url },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error deleting agent file:",
+      error.response?.data || error.message
+    );
+    throw new Error("Error deleting agent file");
+  }
+};
+
+export const validateWebsite = async (websiteUrl) => {
+  try {
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/validate-website`, { website: websiteUrl });
+    return res.data;
+  } catch (error) {
+    console.error("Error validating website:", error);
+    return { valid: false, reason: 'Error validating website' };
+  }
+};

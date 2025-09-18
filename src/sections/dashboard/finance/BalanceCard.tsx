@@ -35,7 +35,7 @@ export default function BalanceCard() {
     <MainCard>
       <Stack sx={{ gap: 2.5 }}>
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h5">My Card</Typography>
+          <Typography variant="h5">My Partner Agent</Typography>
           <IconButton
             color="secondary"
             id="wallet-button"
