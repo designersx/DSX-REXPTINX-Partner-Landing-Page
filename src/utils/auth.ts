@@ -23,3 +23,24 @@ export function isTokenValid(): boolean {
     return false;
   }
 }
+
+export function getUserId(): string | null {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    console.error('No token found in localStorage');
+    return null;
+  }
+
+  try {
+    const decoded = jwtDecode<JwtPayload>(token);
+    // Adjust 'userId' to match the actual claim name in your JWT (e.g., 'sub' or 'id')
+    if (!decoded.user.id) {
+      console.error('User ID not found in token');
+      return null;
+    }
+    return decoded.user.id;
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    return null;
+  }
+}
