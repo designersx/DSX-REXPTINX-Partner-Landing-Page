@@ -23,7 +23,7 @@ export const listSiteMap = async (url) => {
   try {
     const token = localStorage.getItem("token");
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/map/list-sitemap`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/map/list-sitemap2`,
       { url },
       {
         headers: {
@@ -31,6 +31,7 @@ export const listSiteMap = async (url) => {
         },
       }
     );
+    console.log(response)
     return response.data;
   } catch (error) {
     console.error(
@@ -44,6 +45,17 @@ export const listSiteMap = async (url) => {
 export const validateWebsite = async (websiteUrl) => {
   try {
     const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/validate-website`, { website: websiteUrl });
+    return res.data;
+  } catch (error) {
+    console.error("Error validating website:", error);
+    return { valid: false, reason: 'Error validating website' };
+  }
+};
+export const AddKB = async (formData) => {
+  try {
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/enterprise/AddEnterpriseKnowledgeBase`, formData,{
+      headers: { "Content-Type": "multipart/form-data" }
+    });
     return res.data;
   } catch (error) {
     console.error("Error validating website:", error);
