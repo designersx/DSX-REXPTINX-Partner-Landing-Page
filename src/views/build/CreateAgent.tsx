@@ -438,7 +438,7 @@
 
 "use client";
 
-import { useState, useEffect,useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import avatars from "lib/avatars";
 import {
   Grid,
@@ -456,7 +456,7 @@ import {
   StepLabel,
   Box,
   Alert,
- 
+
   IconButton,
 } from "@mui/material";
 import { Paper, Divider } from "@mui/material";
@@ -465,7 +465,7 @@ import { Paper, Divider } from "@mui/material";
 import MainCard from "components/MainCard";
 import { GRID_COMMON_SPACING } from "config";
 import axios from "axios";
-
+import decodeToke from "../../lib/decodeToken"
 // ---------------- Business Data ----------------
 const allBusinessTypes = [
   {
@@ -558,7 +558,7 @@ const businessServices = [
       "Other",
     ],
   },
- 
+
 ];
 
 // ---------------- Languages Data ----------------
@@ -833,7 +833,9 @@ export default function AgentGeneralInfo() {
     agentLanguageCode: "",
     agentVoice: "",
     customServices: [''],
+    agentAccent: ""
   });
+
 
   const [errors, setErrors] = useState({});
   const [activeStep, setActiveStep] = useState(0);
@@ -843,6 +845,8 @@ export default function AgentGeneralInfo() {
   const [audio, setAudio] = useState(null); // Track current audio instance
   const audioRef = useRef(null);
   const [filteredVoices, setFilteredVoices] = useState([]);
+  const token = localStorage.getItem("authToken")
+  const userDetails = decodeToke(token)
 
   const purposes = [
     "Customer Support",
@@ -853,34 +857,34 @@ export default function AgentGeneralInfo() {
   ];
   const agentTypes = ["Inbound", "Outbound", "Both"];
   const genders = ["Male", "Female"];
-
   const steps = ["Agent Details", "Business Details", "Agent Configuration"];
 
   const CustomPlayIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="24"
-    viewBox="0 0 24 24"
-    width="24"
-    style={{ fill: 'currentColor' }} // Match Material-UI icon color
-  >
-    <path d="M0 0h24v24H0z" fill="none" />
-    <path d="M8 5v14l11-7z" />
-  </svg>
-);
-useEffect(() => {
-  if (voices && formData.agentGender) {
-    const filtered = voices.filter(
-      (voice) =>
-        voice.provider === "elevenlabs" &&
-        voice?.gender?.toLocaleLowerCase() === formData?.agentGender?.toLocaleLowerCase()
-    );
-    setFilteredVoices(filtered||[])
-  }
-}, [formData.agentGender, voices]);
-  
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      style={{ fill: 'currentColor' }} // Match Material-UI icon color
+    >
+      <path d="M0 0h24v24H0z" fill="none" />
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+  useEffect(() => {
+    if (voices && formData.agentGender) {
+      const filtered = voices.filter(
+        (voice) =>
+          voice.provider === "elevenlabs" &&
+          voice?.gender?.toLocaleLowerCase() === formData?.agentGender?.toLocaleLowerCase()
+      );
+
+      setFilteredVoices(filtered || [])
+    }
+  }, [formData.agentGender, voices]);
+
   // Fetch voices when gender or language changes
- useEffect(() => {
+  useEffect(() => {
     if (formData.agentGender && formData.agentLanguage) {
       const fetchVoices = async () => {
         try {
@@ -892,9 +896,10 @@ useEffect(() => {
               },
             }
           );
-          // console.log(response?.data)
+
           setVoices(response?.data || []);
           setApiStatus({ status: 'success', message: '' });
+
         } catch (error) {
           setVoices([]);
           setApiStatus({ status: 'error', message: 'Failed to fetch voices' });
@@ -949,45 +954,45 @@ useEffect(() => {
 
   // Clean up audio on component unmount
   const handleCustomServiceChange = (event, index) => {
-  const newCustomServices = [...formData.customServices];
-  newCustomServices[index] = event.target.value;
-  setFormData({ ...formData, customServices: newCustomServices });
+    const newCustomServices = [...formData.customServices];
+    newCustomServices[index] = event.target.value;
+    setFormData({ ...formData, customServices: newCustomServices });
 
-  // Update errors
-  const newErrors = [...errors.customServices];
-  newErrors[index] = validateCustomService(event.target.value);
-  setErrors({ ...errors, customServices: newErrors });
-};
+    // Update errors
+    const newErrors = [...errors.customServices];
+    newErrors[index] = validateCustomService(event.target.value);
+    setErrors({ ...errors, customServices: newErrors });
+  };
 
-const handleAddCustomService = () => {
-  setFormData({
-    ...formData,
-    customServices: [...formData.customServices, '']
-  });
-  setErrors({
-    ...errors,
-    customServices: Array.isArray(errors.customServices)
-      ? [...errors.customServices, '']
-      : ['']
-  });
-};
+  const handleAddCustomService = () => {
+    setFormData({
+      ...formData,
+      customServices: [...formData.customServices, '']
+    });
+    setErrors({
+      ...errors,
+      customServices: Array.isArray(errors.customServices)
+        ? [...errors.customServices, '']
+        : ['']
+    });
+  };
 
-const handleRemoveCustomService = (index) => {
-  const newCustomServices = formData.customServices.filter((_, i) => i !== index);
-  const newErrors = Array.isArray(errors.customServices)
-    ? errors.customServices.filter((_, i) => i !== index)
-    : new Array(formData.customServices.length - 1).fill('');
-  setFormData({ ...formData, customServices: newCustomServices });
-  setErrors({ ...errors, dashboards: newErrors });
-};
+  const handleRemoveCustomService = (index) => {
+    const newCustomServices = formData.customServices.filter((_, i) => i !== index);
+    const newErrors = Array.isArray(errors.customServices)
+      ? errors.customServices.filter((_, i) => i !== index)
+      : new Array(formData.customServices.length - 1).fill('');
+    setFormData({ ...formData, customServices: newCustomServices });
+    setErrors({ ...errors, dashboards: newErrors });
+  };
 
-// Example validation function (adjust as needed)
-const validatedashboard = (value) => {
-  if (!value.trim()) {
-    return 'Custom service is required';
-  }
-  return '';
-};
+  // Example validation function (adjust as needed)
+  const validatedashboard = (value) => {
+    if (!value.trim()) {
+      return 'Custom service is required';
+    }
+    return '';
+  };
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -998,43 +1003,57 @@ const validatedashboard = (value) => {
   }, []);
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === "agentLanguage") {
-    const selectedLang = languages.find((lang) => lang.locale === value);
 
-    setFormData({
-      ...formData,
-      agentLanguage: selectedLang?.name || "",       // store readable name
-      agentLanguageCode: selectedLang?.locale || "", // store locale
-      agentVoice: "", // reset voice if language changes
-    });
-  } else {
-    setFormData({
-      ...formData,
-      [name]: value,
-      ...(name === "agentGender" ? { agentAvatar: "", agentVoice: "" } : {}),
-    });
-  }
-};
+    if (name === "agentVoice") {
+      // Find the selected voice object
+      const selectedVoice = voices.find((v) => v.voice_id === value);
+      // Update formData with voice details including accent
+      setFormData({
+        ...formData,
 
+        agentVoice: selectedVoice?.voice_id || "", // readable name
+        agentAccent: selectedVoice?.accent || "",    // store accent
+      });
+      return;
+    }
+
+    if (name === "agentLanguage") {
+      const selectedLang = languages.find((lang) => lang.locale === value);
+
+      setFormData({
+        ...formData,
+        agentLanguage: selectedLang?.name || "",
+        agentLanguageCode: selectedLang?.locale || "",
+        agentVoice: "", // reset voice if language changes
+        agentAccent: "", // reset accent
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+        ...(name === "agentGender" ? { agentAvatar: "", agentVoice: "", agentAccent: "" } : {}),
+      });
+    }
+  };
 
   const handleServiceChange = (event) => {
-  const value = event.target.value;
-  setFormData({
-    ...formData,
-    service: value,
-    // Clear custom services if "Other" is deselected
-    customServices: value.includes('Other') ? formData.customServices : ['']
-  });
+    const value = event.target.value;
+    setFormData({
+      ...formData,
+      service: value,
+      // Clear custom services if "Other" is deselected
+      customServices: value.includes('Other') ? formData.customServices : ['']
+    });
 
-  // Update errors
-  setErrors({
-    ...errors,
-    service: value.length === 0 ? 'At least one service is required' : '',
-    customServices: value.includes('Other') ? formData.customServices.map(validateCustomService) : []
-  });
-};
+    // Update errors
+    setErrors({
+      ...errors,
+      service: value.length === 0 ? 'At least one service is required' : '',
+      customServices: value.includes('Other') ? formData.customServices.map(validateCustomService) : []
+    });
+  };
 
   const handleAvatarSelect = (avatarImg) => {
     setFormData({
@@ -1066,20 +1085,23 @@ const validatedashboard = (value) => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+//AGENT CREATION PROCESS
   const handleSubmit = async () => {
     if (validateStep(activeStep)) {
       const finalData = {
         ...formData,
+        userId: userDetails?.user?.id,
+        agentAccent: "",
         service: formData.service.map((s) =>
           s === "Other" ? formData.customService : s
         ),
+        agentAccent: formData.agentAccent
       };
 
       try {
         setApiStatus({ status: null, message: null });
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/enterprise/createEnterpriseAgent`,finalData,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/enterpriseAgent/createEnterpriseAgent`, finalData,
           {
             headers: {
               "Content-Type": "application/json",
@@ -1087,12 +1109,13 @@ const validatedashboard = (value) => {
           }
         );
 
-        if (!response.ok) {
-          throw new Error("Failed to submit data to the API");
-        }
 
-        setApiStatus({ status: "success", message: "Data submitted successfully!" });
-        onNext(finalData);
+        console.log(response, "response")
+        if (response) {
+          alert(response?.data?.message)
+        }
+        // setApiStatus({ status: "success", message: "Data submitted successfully!" });
+        // onNext(finalData);
       } catch (error) {
         setApiStatus({
           status: "error",
@@ -1121,7 +1144,10 @@ const validatedashboard = (value) => {
   const selectedIndustryData = allBusinessTypes.find(
     (i) => i.type === formData.industry
   );
+  const handleSelectAccent = (voice) => {
 
+
+  }
   const getStepContent = (step) => {
     switch (step) {
       case 0:
@@ -1270,67 +1296,67 @@ const validatedashboard = (value) => {
             </Stack>
 
             {/* Business Service/Product */}
-           <Stack spacing={1}>
-  <InputLabel>Business Services/Products</InputLabel>
-  <Select
-    multiple
-    name="service"
-    value={formData.service}
-    onChange={handleServiceChange}
-    error={!!errors.service}
-    disabled={!formData.industry}
-    renderValue={(selected) => (
-      <Stack direction="row" spacing={1} flexWrap="wrap">
-        {selected.map((value) => (
-          <Chip key={value} label={value} />
-        ))}
-      </Stack>
-    )}
-    fullWidth
-  >
-    {getServicesByType(formData.industry).map((s) => (
-      <MenuItem key={s} value={s}>
-        {s}
-      </MenuItem>
-    ))}
-  </Select>
-  <FormHelperText error>{errors.service}</FormHelperText>
+            <Stack spacing={1}>
+              <InputLabel>Business Services/Products</InputLabel>
+              <Select
+                multiple
+                name="service"
+                value={formData.service}
+                onChange={handleServiceChange}
+                error={!!errors.service}
+                disabled={!formData.industry}
+                renderValue={(selected) => (
+                  <Stack direction="row" spacing={1} flexWrap="wrap">
+                    {selected.map((value) => (
+                      <Chip key={value} label={value} />
+                    ))}
+                  </Stack>
+                )}
+                fullWidth
+              >
+                {getServicesByType(formData.industry).map((s) => (
+                  <MenuItem key={s} value={s}>
+                    {s}
+                  </MenuItem>
+                ))}
+              </Select>
+              <FormHelperText error>{errors.service}</FormHelperText>
 
-  {/* Custom services when "Other" is selected */}
-  {formData.service.includes("Other") && (
-    <Stack spacing={1} sx={{ mt: 1 }}>
-      {formData.customServices.map((customService, index) => (
-        <Stack key={index} direction="row" spacing={1} alignItems="center">
-          <TextField
-            fullWidth
-            name={`customService_${index}`}
-            placeholder="Enter your custom service"
-            value={customService}
-            onChange={(e) => handleCustomServiceChange(e, index)}
-            error={!!errors.customServices?.[index]}
-            helperText={errors.customServices?.[index]}
-          />
-          {index > 0 && (
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => handleRemoveCustomService(index)}
-            >
-              Remove
-            </Button>
-          )}
-        </Stack>
-      ))}
-      <Button
-        variant="contained"
-        onClick={handleAddCustomService}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        Add Another Service
-      </Button>
-    </Stack>
-  )}
-</Stack>
+              {/* Custom services when "Other" is selected */}
+              {formData.service.includes("Other") && (
+                <Stack spacing={1} sx={{ mt: 1 }}>
+                  {formData.customServices.map((customService, index) => (
+                    <Stack key={index} direction="row" spacing={1} alignItems="center">
+                      <TextField
+                        fullWidth
+                        name={`customService_${index}`}
+                        placeholder="Enter your custom service"
+                        value={customService}
+                        onChange={(e) => handleCustomServiceChange(e, index)}
+                        error={!!errors.customServices?.[index]}
+                        helperText={errors.customServices?.[index]}
+                      />
+                      {index > 0 && (
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleRemoveCustomService(index)}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </Stack>
+                  ))}
+                  <Button
+                    variant="contained"
+                    onClick={handleAddCustomService}
+                    sx={{ alignSelf: 'flex-start' }}
+                  >
+                    Add Another Service
+                  </Button>
+                </Stack>
+              )}
+            </Stack>
             {/* Business Name (Optional) */}
             <Stack spacing={1}>
               <InputLabel>Business Name</InputLabel>
@@ -1368,74 +1394,77 @@ const validatedashboard = (value) => {
 
             {/* Agent Language */}
             <Select
-  name="agentLanguage"
-  value={formData.agentLanguageCode || ""}
-  onChange={handleChange}
-  error={!!errors.agentLanguage}
-  fullWidth
->
-  {
-  languages.map((lang) => (
-    <MenuItem key={lang.locale} value={lang.locale}>
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <img src={`https://flagcdn.com/w20/${lang.locale.split("-")[1]?.toLowerCase() || "us" }.png`} 
-        alt="flag" className="w-5 h-5" onError={(e) => { const target = e.target as HTMLImageElement; 
-        if (lang.locale == "es-419") { target.src = "https://flagcdn.com/w80/es.png";} }} />
-        <Typography>{lang.name}</Typography>
-      </Stack>
-    </MenuItem>
-  ))}
-</Select>
+              name="agentLanguage"
+              value={formData.agentLanguageCode || ""}
+              onChange={handleChange}
+              error={!!errors.agentLanguage}
+              fullWidth
+            >
+              {
+                languages.map((lang) => (
+                  <MenuItem key={lang.locale} value={lang.locale}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <img src={`https://flagcdn.com/w20/${lang.locale.split("-")[1]?.toLowerCase() || "us"}.png`}
+                        alt="flag" className="w-5 h-5" onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          if (lang.locale == "es-419") { target.src = "https://flagcdn.com/w80/es.png"; }
+                        }} />
+                      <Typography>{lang.name}</Typography>
+                    </Stack>
+                  </MenuItem>
+                ))}
+            </Select>
 
 
             {/* Agent Voice */}
-        <Stack spacing={1}>
-      <InputLabel>Agent Voice</InputLabel>
-      <Select
-        name="agentVoice"
-        value={formData.agentVoice || ''}
-        onChange={handleChange}
-        error={!!errors.agentVoice}
-        disabled={!formData.agentGender || !formData.agentLanguage || voices.length === 0}
-        fullWidth
-      >
-        {filteredVoices?.map((voice) => (
-          <MenuItem key={voice.voice_id} value={voice.voice_id}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{ width: '100%' }}
-            >
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography>{voice.voice_name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  ({voice.accent}, {voice.age})
-                </Typography>
-              </Stack>
-              {voice.preview_audio_url && (
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent selecting the MenuItem
-                    handlePlayVoice(voice.voice_id, voice.preview_audio_url);
-                  }}
-                >
-                  {playingVoiceId === voice.voice_id ? (
-                    <CustomPlayIcon fontSize="small" />
-                  ) : (
-                    <CustomPlayIcon />
-                  )}
-                </IconButton>
-              )}
+            <Stack spacing={1}>
+              <InputLabel>Agent Voice</InputLabel>
+              <Select
+                name="agentVoice"
+                value={formData.agentVoice || ''}
+                onChange={handleChange}
+                error={!!errors.agentVoice}
+                disabled={!formData.agentGender || !formData.agentLanguage || voices.length === 0}
+                fullWidth
+              >
+                {filteredVoices?.map((voice) => (
+                  <MenuItem key={voice.voice_id} value={voice.voice_id}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      sx={{ width: '100%' }}
+                    >
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Typography >{voice.voice_name}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          ({voice.accent}, {voice.age})
+                        </Typography>
+                      </Stack>
+                      {voice.preview_audio_url && (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent selecting the MenuItem
+                            handlePlayVoice(voice.voice_id, voice.preview_audio_url);
+
+                          }}
+                        >
+                          {playingVoiceId === voice.voice_id ? (
+                            <CustomPlayIcon fontSize="small" />
+                          ) : (
+                            <CustomPlayIcon />
+                          )}
+                        </IconButton>
+                      )}
+                    </Stack>
+                  </MenuItem>
+                ))}
+              </Select>
+              <FormHelperText error>{errors.agentVoice || apiStatus.message}</FormHelperText>
             </Stack>
-          </MenuItem>
-        ))}
-      </Select>
-      <FormHelperText error>{errors.agentVoice || apiStatus.message}</FormHelperText>
-    </Stack>
           </Stack>
-          
+
         );
       default:
         return null;
@@ -1443,8 +1472,8 @@ const validatedashboard = (value) => {
   };
 
   return (
-    <Grid  justifyContent="center" sx={{ mt: 3, mb: 5 }} style={{width:"75%"}}>
-  <Grid item xs={12} sm={12} md={12} lg={10} >
+    <Grid justifyContent="center" sx={{ mt: 3, mb: 5 }} style={{ width: "75%" }}>
+      <Grid item xs={12} sm={12} md={12} lg={10} >
         <Paper
           elevation={3}
           sx={{
