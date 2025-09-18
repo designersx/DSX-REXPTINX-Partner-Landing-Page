@@ -1,37 +1,57 @@
+// 'use client';
+
+// import { useEffect } from 'react';
+
+// // next
+// import { useRouter } from 'next/navigation';
+// import { useSession } from 'next-auth/react';
+
+// // project-imports
+// import Loader from 'components/Loader';
+
+// // types
+// import { GuardProps } from 'types/auth';
+
+// // ==============================|| AUTH GUARD ||============================== //
+
+// export default function AuthGuard({ children }: GuardProps) {
+//   const { data: session, status } = useSession();
+//   const router = useRouter();
+
+//   useEffect(() => {
+
+
+//     // eslint-disable-next-line
+//   }, [session]);
+
+//   if (status == 'loading' || !session?.user) return <Loader />;
+
+//   return <>{children}</>;
+// }
 'use client';
 
-import { useEffect } from 'react';
-
-// next
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-
-// project-imports
 import Loader from 'components/Loader';
+import { isTokenValid } from 'utils/auth';
 
-// types
-import { GuardProps } from 'types/auth';
-
-// ==============================|| AUTH GUARD ||============================== //
-
-export default function AuthGuard({ children }: GuardProps) {
-  const { data: session, status } = useSession();
+export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const res: any = await fetch('/api/auth/protected');
-      const json = await res?.json();
-      if (!json?.protected) {
-        router.push('/login');
-      }
-    };
-    fetchData();
+    const tokenValid = isTokenValid();
 
-    // eslint-disable-next-line
-  }, [session]);
+    if (!tokenValid) {
+      alert('Session expired. Please login again.');
+      localStorage.removeItem('authToken');
+      router.push('/login');
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
 
-  if (status == 'loading' || !session?.user) return <Loader />;
+  if (isChecking) return <Loader />;
 
   return <>{children}</>;
 }

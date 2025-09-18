@@ -22,23 +22,6 @@ const build: NavItemType = {
   type: 'group',
   icon: icons.page,
   children: [
-    // {
-    //   id: 'maintenance',
-    //   title: 'agents',
-    //   type: 'collapse',
-    //   icon: icons.maintenance,
-    //   isDropdown: true,
-    //   children: [
-    //     {
-    //       id: 'error-404',
-    //       title: 'error-404',
-    //       type: 'item',
-    //       url: '/maintenance/404',
-    //       target: true
-    //     },
-        
-    //   ]
-    // },
     {
       id: 'agents',
       title: 'Agents',

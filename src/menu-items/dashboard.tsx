@@ -1,3 +1,5 @@
+
+
 // This is example of menu item without group for horizontal layout. There will be no children.
 
 // assets
@@ -14,10 +16,10 @@ const icons = {
 // ==============================|| MENU ITEMS - SAMPLE PAGE ||============================== //
 
 const samplePage: NavItemType = {
-  id: 'sample-page',
+  id: 'dashboard',
   title: 'Dashboard',
   type: 'group',
-  url: '/sample-page',
+  url: '/dashboard/analytics',
   icon: icons.samplePage
 };
 
