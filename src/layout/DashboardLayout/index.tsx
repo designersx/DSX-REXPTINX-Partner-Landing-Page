@@ -68,14 +68,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <Footer />
         </Container>
         <Links style={{ textDecoration: 'none' }} href="https://1.envato.market/zNkqj6" target="_blank">
-          <Button
+          {/* <Button
             variant="contained"
             color="error"
             startIcon={<ShoppingCart />}
             sx={{ zIndex: 1199, position: 'fixed', bottom: 50, right: 30 }}
           >
             Buy Now
-          </Button>
+          </Button> */}
         </Links>
       </Box>
     </Box>

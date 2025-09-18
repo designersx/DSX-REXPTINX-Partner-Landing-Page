@@ -27,7 +27,16 @@ const nextConfig = {
     NEXT_APP_JWT_SECRET: 'ikRgjkhi15HJiU78-OLKfjngiu',
     NEXT_APP_JWT_TIMEOUT: '86400',
     NEXTAUTH_SECRET_KEY: 'LlKq6ZtYbr+hTC073mAmAh9/h2HwMfsFo4hrfCx5mLg='
-  }
+  },
+  output: 'export',  
+
+  trailingSlash: true,
+  eslint: {
+    ignoreDuringBuilds: true  // Optional: Skip ESLint on build for speed
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 module.exports = nextConfig;

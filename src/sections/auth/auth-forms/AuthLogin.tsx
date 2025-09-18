@@ -38,6 +38,9 @@ import { APP_DEFAULT_PATH } from 'config';
 // assets
 import { Eye, EyeSlash } from '@wandersonalwes/iconsax-react';
 import { preload } from 'swr';
+import { Login } from '../../../../Services/auth';
+import { useRouter } from 'next/navigation';
+
 
 const Auth0 = '/assets/images/icons/auth0.svg';
 const Cognito = '/assets/images/icons/aws-cognito.svg';
@@ -47,7 +50,7 @@ const Google = '/assets/images/icons/google.svg';
 
 export default function AuthLogin({ providers, csrfToken }: any) {
   const downSM = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
-
+  const router = useRouter();
   const [checked, setChecked] = useState(false);
   const { data: session } = useSession();
   const [showPassword, setShowPassword] = useState(false);
@@ -72,23 +75,33 @@ export default function AuthLogin({ providers, csrfToken }: any) {
           password: Yup.string()
             .required('Password is required')
             .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim())
-            .max(10, 'Password must be less than 10 characters')
+            // .max(10, 'Password must be less than 10 characters')
         })}
-        onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
+           onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
             const trimmedEmail = values.email.trim();
-            const result = await signIn('login', { redirect: false, email: trimmedEmail, password: values.password });
-            if (result?.error) {
-              setStatus({ success: false });
-              setErrors({ submit: result.error });
-            } else {
+            console.log('Submitting:', trimmedEmail, values.password);
+            const result = await Login(trimmedEmail, values.password);
+            console.log('Login result:', result);
+
+            if (result.success && result.token) {
+              localStorage.setItem('authToken', result.token); // Save token
               setStatus({ success: true });
               setSubmitting(false);
-              preload('api/menu/dashboard', fetcher); // load menu on login success
+              preload('/dashboard/analytics', fetcher); // Preload dashboard menu
+              // Use setTimeout to ensure state updates before navigation
+              setTimeout(() => {
+                router.push(APP_DEFAULT_PATH); // Redirect to dashboard
+              }, 100);
+            } else {
+              setStatus({ success: false });
+              setErrors({ submit: result.msg || 'Login failed' });
+              setSubmitting(false);
             }
           } catch (err: any) {
+            console.error('Login error:', err);
             setStatus({ success: false });
-            setErrors({ submit: err.message });
+            setErrors({ submit: err.message || 'An error occurred during login' });
             setSubmitting(false);
           }
         }}
@@ -152,7 +165,7 @@ export default function AuthLogin({ providers, csrfToken }: any) {
                   </FormHelperText>
                 )}
               </Grid>
-
+{/* 
               <Grid sx={{ mt: -1 }} size={12}>
                 <Stack direction="row" sx={{ gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
                   <FormControlLabel
@@ -171,7 +184,7 @@ export default function AuthLogin({ providers, csrfToken }: any) {
                     Forgot Password?
                   </Links>
                 </Stack>
-              </Grid>
+              </Grid> */}
               {errors.submit && (
                 <Grid size={12}>
                   <FormHelperText error>{errors.submit}</FormHelperText>
@@ -189,7 +202,7 @@ export default function AuthLogin({ providers, csrfToken }: any) {
         )}
       </Formik>
 
-      {providers && (
+      {/* {providers && (
         <Stack
           direction="row"
           spacing={{ xs: 1, sm: 2 }}
@@ -243,12 +256,12 @@ export default function AuthLogin({ providers, csrfToken }: any) {
             );
           })}
         </Stack>
-      )}
-      {!providers && (
+      )} */}
+      {/* {!providers && (
         <Box sx={{ mt: 3 }}>
           <FirebaseSocial />
         </Box>
-      )}
+      )} */}
     </>
   );
 }

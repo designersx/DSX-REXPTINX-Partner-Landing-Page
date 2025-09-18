@@ -1,5 +1,6 @@
 {
-  "sample-page": "Sample Page",
+  "agents":"Agents",
+  "dashboard": "Dashboard",
   "maintenance": "Maintenance",
   "error-404": "Error 404",
   "error-500": "Error 500",
