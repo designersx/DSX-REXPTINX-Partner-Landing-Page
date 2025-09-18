@@ -2,13 +2,13 @@
   "name": "able-pro-material-next-ts",
   "version": "4.0.0",
   "author": {
-    "name": "PhoenixCoded",
-    "email": "PhoenixCoded@gmail.com",
-    "url": "https://themeforest.net/user/phoenixcoded"
+    "name": "Rexpt",
+    "email": "support.rexpt@gmail.com",
+    "url": "https://rexpt.us"
   },
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 4001",
     "build": "next build",
     "start": "next start",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
@@ -20,13 +20,14 @@
     "@emotion/cache": "11.14.0",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
+    "@mui/icons-material": "^7.3.2",
     "@mui/lab": "7.0.0-beta.12",
     "@mui/material": "7.1.1",
     "@mui/system": "7.1.1",
     "@wandersonalwes/iconsax-react": "0.0.10",
     "axios": "1.10.0",
-    "formik": "2.4.6",
-    "framer-motion": "12.18.1",
+   
+  
     "history": "5.3.0",
     "lodash-es": "4.17.21",
     "next": "15.3.4",

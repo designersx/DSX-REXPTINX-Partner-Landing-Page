@@ -49,12 +49,28 @@ const build: NavItemType = {
     },
     {
       id: 'knowledgeBase',
-      title: 'knowledgeBase',
+      title: 'knowledge Base',
       type: 'item',
       url: '/build/knowledgeBase',
       icon: icons.contactus,
     
-    }
+    },
+    // {
+    //   id: 'Integrations',
+    //   title: 'Integrations',
+    //   type: 'item',
+    //   url: '/build/Integrations',
+    //   icon: icons.contactus,
+    
+    // },
+  {
+      id: 'DemoAgents',
+      title: 'Demo Agents',
+      type: 'item',
+      url: '/build/Demoview',
+      icon: icons.contactus,
+    
+    },
   ]
 };
 
