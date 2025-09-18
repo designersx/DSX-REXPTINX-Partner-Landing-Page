@@ -10,6 +10,7 @@ import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import CallIcon from '@mui/icons-material/Call';
 
 // project-imports
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
@@ -21,10 +22,10 @@ import GRID_COMMON_SPACING from 'config';
 
 // assets
 import { Add, Edit, Star1 } from '@wandersonalwes/iconsax-react';
-const CourseImg1 = '/assets/images/users/avatar-1.png';
-const CourseImg2 = '/assets/images/users/avatar-2.png';
-const CourseImg3 = '/assets/images/users/avatar-3.png';
-const CourseImg4 = '/assets/images/users/avatar-4.png';
+const CourseImg1 = '/assets/images/avatrs/Female-01.png';
+const CourseImg2 = '/assets/images/avatrs/male-02.png';
+const CourseImg3 = '/assets/images/avatrs/male-01.png';
+const CourseImg4 = '/assets/images/avatrs/Female-03.png';
 // const CourseImg5 = '/assets/images/users/avatar-5.png';
 // const CourseImg6 = '/assets/images/users/avatar-6.png';
 // const CourseImg7 = '/assets/images/online-panel/courseImg7.png';
@@ -35,21 +36,21 @@ const CardData = [
     img: CourseImg1,
     title: 'Anthony',
     rate: 200,
-    duration: '10 Months',
+    duration: '+918278968278',
     teacher: 'Samsung',
     student: '200',
-    tag: 'FREE'
+    category: 'D2C'
   },
-  { img: CourseImg2, title: 'Drothy', rate: 900, duration: '7 Months', teacher: 'Flipkart', student: '50+' ,tag:'Corporate'},
-  { img: CourseImg3, title: 'Anthony', rate: 600, duration: '4 Months', teacher: 'Microsoft', student: '100+', tag: 'Starter' },
+  { img: CourseImg2, title: 'Drothy', rate: 900, duration: '+918278968278', teacher: 'Flipkart', student: '50' ,category:'B2B'},
+  { img: CourseImg3, title: 'Anthony', rate: 600, duration: '+918278968278', teacher: 'Microsoft', student: '100', category: 'Banking' },
   {
     img: CourseImg4,
     title: 'Monika',
     rate: 1000,
-    duration: '6 Months',
+    duration: '+918278968278',
     teacher: 'Amazon',
     student: '20000',
-    tag: 'Enterprise'
+    category: 'Electronics'
   },
 //   { img: CourseImg5, title: 'Web Designing Course', rate: 4.2, duration: '3 Months', teacher: 'Tiger Nixon', student: '130+' },
 //   { img: CourseImg6, title: 'C Training Course', rate: 4.8, duration: '7 Months', teacher: 'Airi Satou', student: '70+', tag: 'FREE' },
@@ -57,7 +58,7 @@ const CardData = [
 //   { img: CourseImg8, title: 'SEO Training Course', rate: 4.3, duration: '1 Year', teacher: 'Cedric Kelly', student: '60 +' }
 ];
 
-const breadcrumbLinks = [{ title: 'home', to: APP_DEFAULT_PATH }, { title: 'online-courses' }, { title: 'courses' }, { title: 'view' }];
+const breadcrumbLinks = [{ title: 'home', to: APP_DEFAULT_PATH },  { title: 'Demo Agents view' }];
 
 // ==============================|| COURSE - VIEW ||============================== //
 
@@ -74,12 +75,12 @@ export default function DemoAgentsViewPage() {
   return (
     <>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        {/* <Breadcrumbs custom heading="view" links={breadcrumbLinks} /> */}
+        <Breadcrumbs custom heading="view" links={breadcrumbLinks} />
         {/* <Button variant="contained" startIcon={<Add />} component={Link} href="/admin-panel/online-course/courses/add">
           Add Course
         </Button> */}
       </Stack>
-      <Grid container spacing={GRID_COMMON_SPACING}>
+      <Grid container spacing={5}>
         {CardData.map((course, index) => (
           <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
             <MainCard content={false} sx={{ p: 1.25 }}>
@@ -91,7 +92,7 @@ export default function DemoAgentsViewPage() {
                   alt="Course Image"
                   sx={{ width: 1, display: 'block', borderRadius: 1 }}
                 />
-                <Badge
+                {/* <Badge
                   sx={{
                     position: 'absolute',
                     top: 15,
@@ -99,7 +100,7 @@ export default function DemoAgentsViewPage() {
                     '.MuiBadge-badge': { p: 0.5, borderRadius: 0.5, bgcolor: 'background.paper' }
                   }}
                   badgeContent={course.tag}
-                />
+                /> */}
               </Box>
 
               <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 0.5, mt: 2.5, mb: 1.25 }}>
@@ -117,30 +118,34 @@ export default function DemoAgentsViewPage() {
                     </Typography>
                   </Stack>
                 </Stack>
-                <IconButton size="small" color="secondary" sx={{ minWidth: 30 }}>
-                  <Edit fontSize="small" />
+                <IconButton size="large" color="primary" sx={{ minWidth: 30 }}>
+                  <CallIcon fontSize="small" />
                 </IconButton>
               </Stack>
 
               <Divider />
               <Stack>
-                <ItemRow title="Call Duration" value={course.duration} />
+                <ItemRow title="Assigned Number" value={course.duration} />
                 <Divider />
                 <ItemRow title="Business" value={course.teacher} />
                 <Divider />
-                {/* <ItemRow title="Mins Left" value={course.student} /> */}
+                <ItemRow title="Category" value={course.category} />
+                <Divider />
+                <ItemRow title="Mins Left" value={course.student} />
+                 
+
               </Stack>
 
-              <Button variant="outlined" size="small" sx={{ mt: 1.25 }}>
+              {/* <Button variant="outlined" size="small" sx={{ mt: 1.25 }}>
                 Read More
-              </Button>
+              </Button> */}
             </MainCard>
           </Grid>
         ))}
       </Grid>
-      <Stack sx={{ alignItems: 'flex-end', mt: 2.5 }}>
+      {/* <Stack sx={{ alignItems: 'flex-end', mt: 2.5 }}>
         <Pagination count={5} size="medium" page={1} showFirstButton showLastButton variant="combined" color="primary" />
-      </Stack>
+      </Stack> */}
     </>
   );
 }

@@ -129,12 +129,12 @@ export default function TransactionCard({ title, caption, color, data, amount }:
 
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
           <Stack direction="row" sx={{ gap: 0.25, alignItems: 'center' }}>
-            <Typography sx={{ fontSize: 'h6', color: 'text.secondary' }}>$</Typography>
+            {/* <Typography sx={{ fontSize: 'h6', color: 'text.secondary' }}>$</Typography> */}
             <Typography variant="h4">{amount}</Typography>
           </Stack>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Compare to last week
-          </Typography>
+          {/* <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            Your activity flow
+          </Typography> */}
         </Stack>
       </Stack>
     </MainCard>
