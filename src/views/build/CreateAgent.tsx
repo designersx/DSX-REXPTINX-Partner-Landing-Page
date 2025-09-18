@@ -818,7 +818,32 @@ function getServicesByType(type) {
 }
 
 // ---------------- Main Component ----------------
-export default function AgentGeneralInfo() {
+export default function AgentGeneralInfo({open, onClose, onSubmit}) {
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        agentName: "",
+        corePurpose: "",
+        industry: "",
+        service: [],
+        customService: "",
+        businessName: "",
+        agentType: "",
+        agentGender: "",
+        agentAvatar: "",
+        agentLanguage: "",
+        agentLanguageCode: "",
+        agentVoice: "",
+        customServices: [''],
+      });
+      setErrors({});
+      setActiveStep(0);
+      setApiStatus({ status: null, message: null });
+      setVoices([]);
+      setPlayingVoiceId(null);
+      setFilteredVoices([]);
+    }
+  }, [open]);
   const [formData, setFormData] = useState({
     agentName: "",
     corePurpose: "",
@@ -868,6 +893,11 @@ export default function AgentGeneralInfo() {
     <path d="M8 5v14l11-7z" />
   </svg>
 );
+const handleClose = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
 useEffect(() => {
   if (voices && formData.agentGender) {
     const filtered = voices.filter(
@@ -1090,7 +1120,9 @@ const validatedashboard = (value) => {
         if (!response.ok) {
           throw new Error("Failed to submit data to the API");
         }
-
+setTimeout(() => {
+          handleClose();
+        }, 1500);
         setApiStatus({ status: "success", message: "Data submitted successfully!" });
         onNext(finalData);
       } catch (error) {
