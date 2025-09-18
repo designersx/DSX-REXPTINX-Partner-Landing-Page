@@ -17,10 +17,10 @@ import MainCard from 'components/MainCard';
 
 // assets
 import { Add } from '@wandersonalwes/iconsax-react';
-const Food = '/assets/images/finance/food.png';
-const Travel = '/assets/images/finance/travel.png';
-const Shopping = '/assets/images/finance/shopping.png';
-const Healthcare = '/assets/images/finance/health.png';
+const Food = '/assets/images/avatrs/Female-01.png';
+const Travel = '/assets/images/avatrs/Female-04.png';
+const Shopping = '/assets/images/avatrs/male-03.png';
+const Healthcare = '/assets/images/avatrs/male-01.png';
 
 interface cardProps {
   name: string;
@@ -30,10 +30,10 @@ interface cardProps {
 }
 
 const cards = [
-  { name: 'Food & Drink', img: Food, percentage: 65, money: 1000 },
-  { name: 'Travel', img: Travel, percentage: 30, money: 400 },
-  { name: 'Shopping', img: Shopping, percentage: 52, money: 900 },
-  { name: 'Healthcare', img: Healthcare, percentage: 25, money: 250 }
+  { name: 'Anthony', img: Food, percentage: 65, money: 1000 },
+  { name: 'Drothy', img: Travel, percentage: 30, money: 400 },
+  { name: 'Monika', img: Shopping, percentage: 52, money: 900 },
+  { name: 'Test', img: Healthcare, percentage: 25, money: 250 }
 ];
 
 // ===========================|| MONEY SPENT - CARD ||=========================== //
@@ -85,7 +85,7 @@ function SpentCard({ name, img, percentage, money }: cardProps) {
             <LinearProgress variant="determinate" value={percentage} color="secondary" />
             <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
               <Typography variant="body2">{percentage}%</Typography>
-              <Typography variant="subtitle2">${money}</Typography>
+              <Typography variant="subtitle2">{money} Mins</Typography>
             </Stack>
           </Stack>
         </MainCard>
@@ -104,10 +104,10 @@ export default function MoneySpentCard() {
           direction={{ xs: 'column', sm: 'row' }}
           sx={{ gap: 1, alignItems: { xs: 'start', sm: 'center' }, justifyContent: 'space-between' }}
         >
-          <Typography variant="h5">Where your money go ?</Typography>
-          <Button color="primary" size="small" startIcon={<Add />} variant="contained">
+          <Typography variant="h5">Where your minutes go ?</Typography>
+          {/* <Button color="primary" size="small" startIcon={<Add />} variant="contained">
             Add Item
-          </Button>
+          </Button> */}
         </Stack>
         <Grid container spacing={1.5}>
           {cards.map((card, index) => (

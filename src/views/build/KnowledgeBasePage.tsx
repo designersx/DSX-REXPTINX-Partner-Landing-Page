@@ -18,6 +18,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon  from "@mui/icons-material/Add";
+import BasicModal from "./AddKnowledgebase";
 const items = [
   {
     name: "Immigrate Management-2025-05-26",
@@ -40,8 +41,10 @@ const items = [
 
 export default function KnowledgeBaseUI() {
   const [selectedItem, setSelectedItem] = useState<any>(items[0]);
+  const [open, setOpen] = useState(false);
 
   return (
+    <>
     <Grid container spacing={2} sx={{ height: "100%" }}>
       {/* Left Panel - Knowledge Base List */}
       <Grid item xs={12} md={3}>
@@ -57,9 +60,9 @@ export default function KnowledgeBaseUI() {
   <Typography variant="subtitle1" fontWeight="bold">
     Knowledge Base
   </Typography>
- <IconButton color="warning" size="large">
-                  <AddIcon />
-                </IconButton>
+    <IconButton color="warning" size="large" onClick={() => setOpen(true)}>
+        <AddIcon />
+      </IconButton>
 </Box>
           <List sx={{ maxHeight: "80vh", overflowY: "auto" }}>
             {items.map((item, index) => (
@@ -184,5 +187,11 @@ export default function KnowledgeBaseUI() {
         )}
       </Grid>
     </Grid>
+    <BasicModal 
+        open={open} 
+        onClose={() => setOpen(false)} 
+        // onSubmit={handleSubmit} 
+      />
+      </>
   );
 }

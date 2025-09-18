@@ -25,62 +25,62 @@ export default function DashboardFinance() {
   return (
   // <></>
     <Grid container spacing={GRID_COMMON_SPACING}>
-      <Grid size={{ xs: 12, lg: 4 }}>
+      {/* <Grid size={{ xs: 12, lg: 4 }}>
         <Grid container spacing={GRID_COMMON_SPACING}>
           <Grid size={{ xs: 12, sm: 6, lg: 12 }}>
             <BalanceCard />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, lg: 12 }}>
+          {/* <Grid size={{ xs: 12, sm: 6, lg: 12 }}>
             <Transactions />
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid size={{ xs: 12, lg: 8 }}>
+          </Grid> */}
+        {/* </Grid>
+      </Grid> */} 
+      <Grid size={{ xs: 12, lg: 12 }}>
         <Grid container spacing={GRID_COMMON_SPACING}>
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TransactionCard
-              title="Total Balance"
+              title="Total Minutes"
               caption="Apr 01 - Mar 31 (2023)"
               color={theme.palette.primary.main}
               data={[0, 70, 70, 120, 120, 120, 80, 80, 0, 0, 130, 130, 199, 199, 199]}
-              amount="650k"
+              amount="5500 Mins"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TransactionCard
-              title="Total Expends"
+              title="Total Used minutes "
               caption="Apr 01 - Mar 31 (2023)"
               color={theme.palette.success.main}
               data={[180, 110, 110, 50, 50, 80, 80, 80, 100, 100, 199, 50, 50, 0, 0]}
-              amount="510k"
+              amount="500 Mins"
             />
           </Grid>
           <Grid size={{ xs: 12, lg: 4 }}>
             <TransactionCard
-              title="Total Expends"
+              title="Left Minutes"
               caption="Apr 01 - Mar 31 (2023)"
               color={theme.palette.error.main}
               data={[70, 199, 199, 130, 130, 130, 0, 140, 140, 80, 80, 20, 70, 70]}
-              amount="862k"
+              amount="5000 Mins"
             />
           </Grid>
-          <Grid size={12}>
+          {/* <Grid size={12}>
             <CashflowChartCard />
-          </Grid>
+          </Grid> */}
           <Grid size={12}>
             <MoneySpentCard />
           </Grid>
         </Grid>
       </Grid>
-      <Grid size={{ xs: 12, lg: 4 }}>
+      {/* <Grid size={{ xs: 12, lg: 4 }}>
         <AccountsCard />
-      </Grid> 
-       <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+      </Grid>  */}
+       {/* <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
         <QuickTransferCard />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+      </Grid> */}
+      {/* <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
         <CategoryCard />
-      </Grid>
+      </Grid> */}
       <Grid size={{ xs: 12, lg: 12 }}>
         <TransactionHistoryCard />
       </Grid>

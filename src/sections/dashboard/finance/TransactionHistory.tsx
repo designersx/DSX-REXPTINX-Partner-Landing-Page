@@ -18,11 +18,11 @@ import MainCard from 'components/MainCard';
 
 // assets
 import { Edit, Eye, Trash } from '@wandersonalwes/iconsax-react';
-const Avatar1 = '/assets/images/users/avatar-1.png';
-const Avatar2 = '/assets/images/users/avatar-2.png';
-const Avatar3 = '/assets/images/users/avatar-3.png';
-const Avatar4 = '/assets/images/users/avatar-4.png';
-const Avatar5 = '/assets/images/users/avatar-5.png';
+const Avatar1 = '/assets/images/avatrs/Female-01.png';
+const Avatar2 = '/assets/images/avatrs/male-01.png';
+const Avatar3 = '/assets/images/avatrs/Female-02.png';
+const Avatar4 = '/assets/images/avatrs/male-02.png';
+const Avatar5 = '/assets/images/avatrs/male-03.png';
 
 // table data
 function createData(
@@ -46,11 +46,11 @@ const getValidColor = (color: string): ChipColor => {
 };
 
 const rows = [
-  createData('Airi Satou', Avatar1, 'Salary Payment', ' 2023/02/07', '09:05 PM', 950.54, 'Completed', 'success'),
-  createData('Ashton Cox', Avatar2, 'Project Payment', '2023/02/01', '02:14 PM', 520.39, 'Completed', 'success'),
-  createData('Bradley Greer', Avatar3, 'You Tube Subscribe', '2023/01/22', '10:32 AM', 100.09, 'Pending', 'warning'),
-  createData('Brielle Williamson', Avatar4, 'Salary Payment', '2023/02/07', '09:05 PM', 760.25, 'In Progress', 'primary'),
-  createData('Airi Satou', Avatar5, 'Spotify Subscribe', '2023/02/07', '09:05 PM', 60.05, 'Canceled', 'error')
+  createData('Airi Satou', Avatar1, 'Samsung', ' 2023/02/07', '09:05 PM', 950, 'Active', 'success'),
+  createData('Ashton Cox', Avatar2, 'Microsoft', '2023/02/01', '02:14 PM', 520, 'Active', 'success'),
+  createData('Bradley Greer', Avatar3, 'You Tube ', '2023/01/22', '10:32 AM', 100, 'Active', 'success'),
+  createData('Brielle Williamson', Avatar4, 'Amazon', '2023/02/07', '09:05 PM', 760, 'Inactive', 'error'),
+  createData('Airi Satou', Avatar5, 'Spotify', '2023/02/07', '09:05 PM', 60, 'Inactive', 'error')
 ];
 
 // ==========================|| FINANCE - TRANSFER HISTORY ||========================== //
@@ -58,7 +58,7 @@ const rows = [
 export default function TransactionHistoryCard() {
   return (
     <MainCard
-      title={<Typography variant="h5">Transaction History</Typography>}
+      title={<Typography variant="h5">Your Agents</Typography>}
       content={false}
       secondary={
         <Link href="#" variant="h6" color="primary">
@@ -70,10 +70,10 @@ export default function TransactionHistoryCard() {
         <Table sx={{ minWidth: 560 }}>
           <TableHead>
             <TableRow>
-              <TableCell>User Name</TableCell>
-              <TableCell>Category</TableCell>
+              <TableCell>Agent Name</TableCell>
+              <TableCell>Business</TableCell>
               <TableCell>Date/Time</TableCell>
-              <TableCell align="center">Amount</TableCell>
+              <TableCell align="center">Mins Assign</TableCell>
               <TableCell align="center">Status</TableCell>
               <TableCell align="center">Action</TableCell>
             </TableRow>
@@ -99,7 +99,7 @@ export default function TransactionHistoryCard() {
                   </Stack>
                 </TableCell>
                 <TableCell align="center">
-                  <Typography>${row.Amount}</Typography>
+                  <Typography>{row.Amount}</Typography>
                 </TableCell>
                 <TableCell align="center">
                   <Chip size="small" color={getValidColor(row.color)} label={row.status} />
