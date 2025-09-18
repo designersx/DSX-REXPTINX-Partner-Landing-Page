@@ -818,7 +818,32 @@ function getServicesByType(type) {
 }
 
 // ---------------- Main Component ----------------
-export default function AgentGeneralInfo() {
+export default function AgentGeneralInfo({open, onClose, onSubmit}) {
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        agentName: "",
+        corePurpose: "",
+        industry: "",
+        service: [],
+        customService: "",
+        businessName: "",
+        agentType: "",
+        agentGender: "",
+        agentAvatar: "",
+        agentLanguage: "",
+        agentLanguageCode: "",
+        agentVoice: "",
+        customServices: [''],
+      });
+      setErrors({});
+      setActiveStep(0);
+      setApiStatus({ status: null, message: null });
+      setVoices([]);
+      setPlayingVoiceId(null);
+      setFilteredVoices([]);
+    }
+  }, [open]);
   const [formData, setFormData] = useState({
     agentName: "",
     corePurpose: "",
@@ -860,6 +885,7 @@ export default function AgentGeneralInfo() {
   const steps = ["Agent Details", "Business Details", "Agent Configuration"];
 
   const CustomPlayIcon = () => (
+
     <svg
       xmlns="http://www.w3.org/2000/svg"
       height="24"
@@ -882,6 +908,7 @@ export default function AgentGeneralInfo() {
       setFilteredVoices(filtered || [])
     }
   }, [formData.agentGender, voices]);
+
 
   // Fetch voices when gender or language changes
   useEffect(() => {
@@ -1109,13 +1136,18 @@ export default function AgentGeneralInfo() {
           }
         );
 
-
-        console.log(response, "response")
-        if (response) {
+ if (response) {
+    setTimeout(() => {
+          handleClose();
+        }, 1500);
+   setApiStatus({ status: "success", message: response?.data?.message });
           alert(response?.data?.message)
         }
+        console.log(response, "response")
+       
         // setApiStatus({ status: "success", message: "Data submitted successfully!" });
         // onNext(finalData);
+
       } catch (error) {
         setApiStatus({
           status: "error",

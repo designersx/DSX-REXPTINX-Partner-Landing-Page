@@ -19,6 +19,18 @@ export const Login = async (email, password) => {
     }
 };
 
+export const fetchAgent=async()=> {
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/agent/getKnowledgeBaseBasedUser/RX79HO1758188654`
+    );
+    console.log(res,"res")
+    return res.data; // response data
+  } catch (err) {
+    console.error("Error fetching agent:", err);
+    throw err; // rethrow if needed
+  }
+}
 export const listSiteMap = async (url) => {
   try {
     const token = localStorage.getItem("token");

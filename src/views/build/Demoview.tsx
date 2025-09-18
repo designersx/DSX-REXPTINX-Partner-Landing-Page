@@ -1,151 +1,284 @@
+"use client";
+
 import Link from 'next/link';
 
-// martial-imports
+// material imports
 import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
-import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import CallIcon from '@mui/icons-material/Call';
 
-// project-imports
+// project imports
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import IconButton from 'components/@extended/IconButton';
 import MainCard from 'components/MainCard';
-import { APP_DEFAULT_PATH,  } from 'config';
-
+import { APP_DEFAULT_PATH } from 'config';
 import GRID_COMMON_SPACING from 'config';
 
 // assets
-import { Add, Edit, Star1 } from '@wandersonalwes/iconsax-react';
-const CourseImg1 = '/assets/images/avatrs/Female-01.png';
-const CourseImg2 = '/assets/images/avatrs/male-02.png';
-const CourseImg3 = '/assets/images/avatrs/male-01.png';
-const CourseImg4 = '/assets/images/avatrs/Female-03.png';
-// const CourseImg5 = '/assets/images/users/avatar-5.png';
-// const CourseImg6 = '/assets/images/users/avatar-6.png';
-// const CourseImg7 = '/assets/images/online-panel/courseImg7.png';
-// const CourseImg8 = '/assets/images/online-panel/courseImg8.png';
+import { Star1 } from '@wandersonalwes/iconsax-react';
+import { useEffect, useRef, useState } from 'react';
+import { fetchAgent } from '../../../Services/auth'; // ✅ your API call
+import CallDialog from 'components/CallDialog';
+import { RetellWebClient } from "retell-client-js-sdk";
+import axios from 'axios';
 
-const CardData = [
-  {
-    img: CourseImg1,
-    title: 'Anthony',
-    rate: 200,
-    duration: '+918278968278',
-    teacher: 'Samsung',
-    student: '200',
-    category: 'D2C'
-  },
-  { img: CourseImg2, title: 'Drothy', rate: 900, duration: '+918278968278', teacher: 'Flipkart', student: '50' ,category:'B2B'},
-  { img: CourseImg3, title: 'Anthony', rate: 600, duration: '+918278968278', teacher: 'Microsoft', student: '100', category: 'Banking' },
-  {
-    img: CourseImg4,
-    title: 'Monika',
-    rate: 1000,
-    duration: '+918278968278',
-    teacher: 'Amazon',
-    student: '20000',
-    category: 'Electronics'
-  },
-//   { img: CourseImg5, title: 'Web Designing Course', rate: 4.2, duration: '3 Months', teacher: 'Tiger Nixon', student: '130+' },
-//   { img: CourseImg6, title: 'C Training Course', rate: 4.8, duration: '7 Months', teacher: 'Airi Satou', student: '70+', tag: 'FREE' },
-//   { img: CourseImg7, title: 'UI/UX Designing Course', rate: 4.6, duration: '4 Months', teacher: 'Sonya Frost', student: '150+' },
-//   { img: CourseImg8, title: 'SEO Training Course', rate: 4.3, duration: '1 Year', teacher: 'Cedric Kelly', student: '60 +' }
-];
 
-const breadcrumbLinks = [{ title: 'home', to: APP_DEFAULT_PATH },  { title: 'Demo Agents view' }];
-
-// ==============================|| COURSE - VIEW ||============================== //
+const breadcrumbLinks = [{ title: 'home', to: APP_DEFAULT_PATH }, { title: 'Demo Agents view' }];
 
 export default function DemoAgentsViewPage() {
-  const ItemRow = ({ title, value }: { title: string; value: string }) => {
-    return (
-      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 5, py: 1 }}>
-        <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>
-        <Typography>{value}</Typography>
-      </Stack>
-    );
+  const [agents, setAgents] = useState<any[]>([]); // store API data
+  const [loading, setLoading] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<any>(null);
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [callLoading, setCallLoading] = useState(false);
+  const isEndingRef = useRef(false);
+  const [isCallInProgress, setIsCallInProgress] = useState(false);
+  const [callId, setCallId] = useState("");
+  const [retellWebClient, setRetellWebClient] = useState(null);
+
+console.log('selectedAgent',selectedAgent)
+  useEffect(() => {
+    const loadAgents = async () => {
+      try {
+        const res = await fetchAgent(); // ✅ call your API function
+        console.log("API response:", res);
+
+        // Assuming res is an array of agents
+        setAgents(res?.agents||[]);
+      } catch (err) {
+        console.error("Error fetching agents:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAgents();
+  }, []);
+
+  const ItemRow = ({ title, value }: { title: string; value: string }) => (
+    <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 5, py: 1 }}>
+      <Typography sx={{ color: 'text.secondary' }}>{title}</Typography>
+      <Typography>{value}</Typography>
+    </Stack>
+  );
+  
+  const handleOpenDialog = (agent: any) => {
+    setSelectedAgent(agent);
+    setOpenDialog(true);
   };
+
+  const handleCloseDialog = () => {
+    if (isCallActive) {
+      isEndingRef.current = true;
+      setCallLoading(true);
+      setTimeout(() => {
+        isEndingRef.current = false;
+        setIsCallActive(false);
+        setCallLoading(false);
+        setOpenDialog(false);
+        setSelectedAgent(null);
+      }, 1000); // Simulate call ending delay
+    } else {
+      setOpenDialog(false);
+      setSelectedAgent(null);
+    }
+  };
+
+    useEffect(() => {
+    const client = new RetellWebClient();
+    client.on("call_started", () => setIsCallActive(true));
+    client.on("call_ended", () => setIsCallActive(false));
+    client.on("update", (update) => {
+      //  Mark the update clearly as AGENT message
+      const customUpdate = {
+        ...update,
+        source: "agent", // Add explicit source
+      };
+
+      // Dispatch custom event for CallTest
+      window.dispatchEvent(
+        new CustomEvent("retellUpdate", { detail: customUpdate })
+      );
+    });
+
+    setRetellWebClient(client);
+  }, []);
+
+  const handleStartCall = async() => {
+    setCallLoading(true);
+     
+        let micPermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+
+    if (micPermission.state !== "granted") {
+      try {
+        // Step 2: Ask for mic access
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // Step 3: Recheck permission after user action
+        micPermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+
+        if (micPermission.state !== "granted") {
+          // Swal.fire("Microphone Required", "You must grant microphone access to start the call.", "warning");
+          return;
+        }
+      } catch (err) {
+        // User denied mic access
+        // Swal.fire("Microphone Blocked", "Please allow microphone permission to continue.", "error");
+        // setShowCallModal(false);
+        return;
+      }
+    }
+      setCallLoading(true);
+    try {
+      const agentId = selectedAgent?.agent_id;
+      if (!agentId) throw new Error("No agent ID found");
+
+      // Example: Initiate a call with Retell AI
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/agent/create-web-call`,
+        {
+          agent_id: agentId,
+          // Add other required parameters, e.g., phone number or call settings
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_RETELL_API}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setCallLoading(true);
+
+      if (response.status == 403) {
+        // Swal.fire('Error', "Agent Plan minutes exhausted", 'error');
+        setIsCallInProgress(false);
+        // setTimeout(() => {
+        //   setPopupMessage("");
+        // }, 5000);
+        return;
+      }
+
+      await retellWebClient.startCall({ accessToken: response?.data?.access_token });
+      setCallId(response?.data?.call_id);
+      setIsCallActive(true);
+    } catch (error) {
+      console.error("Error starting call:", error);
+      // Swal.fire("Failed to start call. Please try again.");
+    } finally {
+      setCallLoading(false);
+    }
+  };
+
+  const handleEndCall = async() => {
+    isEndingRef.current = true;
+    setCallLoading(true);
+        isEndingRef.current = false;
+    // setRefresh((prev) => !prev);
+    try {
+      // Example: End the call with Retell AI
+      // const callId = localStorage.getItem("currentCallId"); 
+      // const callId = localStorage.getItem("currentCallId"); 
+      // if (!callId) throw new Error("No call ID found");
+
+      const response = await retellWebClient.stopCall();
+
+      setIsCallActive(false);
+      isEndingRef.current = false;
+    } catch (error) {
+      console.error("Error ending call:", error);
+      // Swal.fire("Failed to end call. Please try again.");
+    }
+    setTimeout(() => {
+      isEndingRef.current = false;
+      setIsCallActive(false);
+      setCallLoading(false);
+      setOpenDialog(false);
+      setSelectedAgent(null);
+    }, 1000); // Simulate call ending delay
+  };
+
 
   return (
     <>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
         <Breadcrumbs custom heading="view" links={breadcrumbLinks} />
-        {/* <Button variant="contained" startIcon={<Add />} component={Link} href="/admin-panel/online-course/courses/add">
-          Add Course
-        </Button> */}
       </Stack>
-      <Grid container spacing={5}>
-        {CardData.map((course, index) => (
-          <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
-            <MainCard content={false} sx={{ p: 1.25 }}>
-              <Box sx={{ position: 'relative', width: 1 }}>
-                <CardMedia
-                  component="img"
-                  height="auto"
-                  image={course.img}
-                  alt="Course Image"
-                  sx={{ width: 1, display: 'block', borderRadius: 1 }}
-                />
-                {/* <Badge
-                  sx={{
-                    position: 'absolute',
-                    top: 15,
-                    right: 25,
-                    '.MuiBadge-badge': { p: 0.5, borderRadius: 0.5, bgcolor: 'background.paper' }
-                  }}
-                  badgeContent={course.tag}
-                /> */}
-              </Box>
 
-              <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 0.5, mt: 2.5, mb: 1.25 }}>
-                <Stack sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: 1 }}
-                  >
-                    {course.title}
-                  </Typography>
-                  <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5, color: 'warning.main' }}>
-                    <Star1 size="14" />
-                    <Typography variant="body2" sx={{ color: 'text.primary' }}>
-                      {course.rate}
+      {loading ? (
+        <Typography>Loading agents...</Typography>
+      ) : (
+        <Grid container spacing={5}>
+          {agents.map((agent: any, index: number) => (
+            <Grid key={index} size={{ xs: 12, sm: 10, lg: 4 }}>
+              <MainCard content={false} sx={{ p: 1.25 }}>
+                <Box sx={{ position: 'relative', width: 1 }}>
+                  <CardMedia
+                    component="img"
+                    height="auto"
+                    image={`/${agent?.avatar}` || '/images/male-02.png'} 
+                    alt="Agent"
+                    sx={{ width: 1, display: 'block', borderRadius: 1 }}
+                  />
+                </Box>
+
+                <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 0.5, mt: 2.5, mb: 1.25 }}>
+                  <Stack sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: 1 }}
+                    >
+                      {agent.agentName || "Test"}
                     </Typography>
+                    <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5, color: 'warning.main' }}>
+                      <Star1 size="14" />
+                      <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                        {agent.agentRole || "General Receptionist"}
+                      </Typography>
+                    </Stack>
                   </Stack>
+                  <IconButton size="large" color="primary" sx={{ minWidth: 30 }} onClick={() => handleOpenDialog(agent)}>
+                    <CallIcon fontSize="small" />
+                  </IconButton>
                 </Stack>
-                <IconButton size="large" color="primary" sx={{ minWidth: 30 }}>
-                  <CallIcon fontSize="small" />
-                </IconButton>
-              </Stack>
 
-              <Divider />
-              <Stack>
-                <ItemRow title="Assigned Number" value={course.duration} />
                 <Divider />
-                <ItemRow title="Business" value={course.teacher} />
-                <Divider />
-                <ItemRow title="Category" value={course.category} />
-                <Divider />
-                <ItemRow title="Mins Left" value={course.student} />
-                 
+                <Stack>
+                  <ItemRow title="Assigned Number" value={agent?.voip_numbers || agent?.phone || "-"} />
+                  <Divider />
 
-              </Stack>
-
-              {/* <Button variant="outlined" size="small" sx={{ mt: 1.25 }}>
-                Read More
-              </Button> */}
-            </MainCard>
-          </Grid>
-        ))}
-      </Grid>
-      {/* <Stack sx={{ alignItems: 'flex-end', mt: 2.5 }}>
-        <Pagination count={5} size="medium" page={1} showFirstButton showLastButton variant="combined" color="primary" />
-      </Stack> */}
+                  <ItemRow title="Business" value={agent?.businessDetails?.name || agent.company || "-"} />
+                  <Divider />
+                  <ItemRow title="Category" value={agent?.businessDetails?.BusinessType || "-"} />
+                  <Divider />
+                  <ItemRow title="Mins Left" value={agent?.mins_left || "-"} />
+                   <Divider />
+                  <ItemRow title="Language" value={agent?.agentLanguage || "-"} />
+               
+                </Stack>
+              </MainCard>
+            </Grid>
+          ))}
+         { selectedAgent &&
+        <CallDialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          agent={selectedAgent}
+          isCallActive={isCallActive}
+          callLoading={callLoading}
+          onStartCall={handleStartCall}
+          onEndCall={handleEndCall}
+          isEndingRef={isEndingRef}
+        />
+         }
+        </Grid>
+      )}
     </>
   );
 }
