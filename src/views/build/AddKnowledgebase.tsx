@@ -18,7 +18,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
-import {toast,ToastContainer} from "react-toastify"
+import { toast, ToastContainer } from "react-toastify"
 // project-imports
 import MainCard from 'components/MainCard';
 import { AddKB, listSiteMap, validateWebsite } from '../../../Services/auth';
@@ -46,44 +46,44 @@ export default function BasicModal({ open, onClose, onSubmit }) {
   //   setFiles(Array.from(e.target.files));
   // };
 
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const selectedFiles = Array.from(e.target.files || []);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
 
-  const allowedTypes = [
-    "image/png",
-    "image/jpeg",
-    "application/pdf",
-    "text/csv",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ];
+    const allowedTypes = [
+      "image/png",
+      "image/jpeg",
+      "application/pdf",
+      "text/csv",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
 
-  const validFiles: File[] = [];
-  const errors: string[] = [];
+    const validFiles: File[] = [];
+    const errors: string[] = [];
 
-  selectedFiles.forEach((file) => {
-    if (!allowedTypes.includes(file.type)) {
-      errors.push(`${file.name} is not an allowed file type.`);
-      return;
+    selectedFiles.forEach((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        errors.push(`${file.name} is not an allowed file type.`);
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        errors.push(`${file.name} exceeds 10MB.`);
+        return;
+      }
+      validFiles.push(file);
+    });
+
+    if (errors.length > 0) {
+      alert(errors.join("\n")); // Sirf error files ke liye alert
     }
-    if (file.size > 10 * 1024 * 1024) {
-      errors.push(`${file.name} exceeds 10MB.`);
-      return;
+
+    // Sirf valid files hi set karenge
+    setFiles(validFiles);
+
+    // Agar koi valid file nahi hai to input ka value reset karein
+    if (validFiles.length === 0) {
+      e.target.value = "";
     }
-    validFiles.push(file);
-  });
-
-  if (errors.length > 0) {
-    alert(errors.join("\n")); // Sirf error files ke liye alert
-  }
-
-  // Sirf valid files hi set karenge
-  setFiles(validFiles);
-
-  // Agar koi valid file nahi hai to input ka value reset karein
-  if (validFiles.length === 0) {
-    e.target.value = "";
-  }
-};
+  };
 
 
 
@@ -172,7 +172,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     return urls.filter((url) => companyKeywords.some((keyword) => url.toLowerCase().includes(keyword)));
   };
 
-  const handleSubmit =async() => {
+  const handleSubmit = async () => {
     // const data = { 
     //   kbName, 
     //   files, 
@@ -181,38 +181,38 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     //   selectedSitemapUrls: Array.from(selectedUrls)
     // };
     // console.log(data)
-  const formDataObj = new FormData();
-  formDataObj.append("userId", userId);
-  formDataObj.append("kbName", kbName);
-  formDataObj.append("text", text);
-  formDataObj.append("url", formData.website);
-  formDataObj.append("selectedSitemapUrls", JSON.stringify(Array.from(selectedUrls)));
+    const formDataObj = new FormData();
+    formDataObj.append("userId", userId);
+    formDataObj.append("kbName", kbName);
+    formDataObj.append("text", text);
+    formDataObj.append("url", formData.website);
+    formDataObj.append("selectedSitemapUrls", JSON.stringify(Array.from(selectedUrls)));
 
-  files.forEach((file) => {
-    formDataObj.append("KbFiles", file);
-  });
+    files.forEach((file) => {
+      formDataObj.append("KbFiles", file);
+    });
 
-  try {
-    const res = await AddKB(formDataObj)
-   toast.success("Knowldgebase Added!", {
-  position: "top-center",
-  autoClose: 2000,
-  hideProgressBar: false,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
-});
-    console.log("Saved:", res.data);
-    setTimeout(() => {
+    try {
+      const res = await AddKB(formDataObj)
+      toast.success("Knowldgebase Added!", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.log("Saved:", res.data);
+      setTimeout(() => {
         handleClose();
-    }, 2000);
- 
-  } catch (err) {
-    console.error("Error:", err);
-  }
-    
+      }, 2000);
+
+    } catch (err) {
+      console.error("Error:", err);
+    }
+
     // if (onSubmit) onSubmit(data);
-    
+
   };
 
   const handleWebsiteBlur = () => {
@@ -269,7 +269,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
   return (
     <Modal open={open} onClose={handleClose}>
-      <MainCard title="Knowledge Base" modal darkTitle content={false} style={{width:'30%'}}>
+      <MainCard title="Knowledge Base" modal darkTitle content={false} style={{ width: '30%' }}>
         <CardContent>
           {step === 1 && (
             <Box sx={{ mb: 2 }}>
@@ -289,35 +289,35 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           {step === 2 && (
             <>
               {/* File Upload */}
-           <Box sx={{ mb: 2 }}>
-  <Typography variant="subtitle2" gutterBottom>
-    Upload Files
-  </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Upload Files
+                </Typography>
 
-  <input
-    type="file"
-    multiple
-    accept=".png,.jpg,.jpeg,.pdf,.csv,.docx"
-    onChange={handleFileChange}
-  />
+                <input
+                  type="file"
+                  multiple
+                  accept=".png,.jpg,.jpeg,.pdf,.csv,.docx"
+                  onChange={handleFileChange}
+                />
 
-  <Typography
-    variant="caption"
-    sx={{ display: "block", mt: 1, color: "text.secondary" }}
-  >
-    Max 10MB per file. Allowed: PNG, JPG, PDF, CSV, DOCX
-  </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ display: "block", mt: 1, color: "text.secondary" }}
+                >
+                  Max 10MB per file. Allowed: PNG, JPG, PDF, CSV, DOCX
+                </Typography>
 
-  {files.length > 0 ? (
-  <Typography variant="body2" sx={{ mt: 1 }}>
-    {files.map((file) => file.name).join(", ")}
-  </Typography>
-) : (
-  <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
-    No file chosen
-  </Typography>
-)}
-</Box>
+                {files.length > 0 ? (
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    {files.map((file) => file.name).join(", ")}
+                  </Typography>
+                ) : (
+                  <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
+                    No file chosen
+                  </Typography>
+                )}
+              </Box>
 
 
               {/* Text Input */}
@@ -409,7 +409,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                   </Typography>
                   <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
                     <List>
-                      <ListItem 
+                      <ListItem
                         secondaryAction={
                           <FormControlLabel
                             control={
@@ -435,8 +435,8 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                               onChange={() => toggleOne(sitemapUrl)}
                             />
                           </ListItemIcon>
-                          <ListItemText 
-                            primary={sitemapUrl} 
+                          <ListItemText
+                            primary={sitemapUrl}
                             primaryTypographyProps={{ variant: 'body2' }}
                           />
                         </ListItem>
@@ -466,9 +466,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               Next
             </Button>
           ) : (
-            <Button 
-              variant="contained" 
-              size="small" 
+            <Button
+              variant="contained"
+              size="small"
               onClick={handleSubmit}
               disabled={!kbName.trim() && !files.length && !text.trim() && !formData.website.trim()}
             >
@@ -477,13 +477,13 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           )}
         </Stack>
         <ToastContainer
-  position="bottom-right"
-  autoClose={3000}
-  newestOnTop={false}
-  closeButton={true}
-/>
+          position="bottom-right"
+          autoClose={3000}
+          newestOnTop={false}
+          closeButton={true}
+        />
       </MainCard>
-       
+
     </Modal>
   );
 }
