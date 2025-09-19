@@ -1,9 +1,8 @@
 // project-imports
 import Create from 'views/build/EditAgent';
-import SamplePagePage from 'views/other/SamplePage';
-
 // ==============================|| SAMPLE PAGE ||============================== //
+export default async  function SamplePage({ params }) {
+   const { agentId } = await params;
 
-export default function SamplePage() {
-  return <Create />;
+  return <Create agentId={agentId} />;
 }

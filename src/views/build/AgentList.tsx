@@ -13,14 +13,6 @@ import TransactionHistoryCard from './AgentPage';
 
 export default function AgentList() {
   return (
-    // <>    <MainCard title="Sample Card">
-    //   <Typography variant="body1">
-    //    hy AGENT
-    //   </Typography>
-
-    // </MainCard>
 <TransactionHistoryCard/>  
-
-
 );
 }
