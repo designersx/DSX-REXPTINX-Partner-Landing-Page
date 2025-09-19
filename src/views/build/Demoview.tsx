@@ -27,6 +27,8 @@ import { fetchAgent } from '../../../Services/auth'; // ✅ your API call
 import CallDialog from 'components/CallDialog';
 import { RetellWebClient } from "retell-client-js-sdk";
 import axios from 'axios';
+import Snackbar from '@mui/material/Snackbar';
+import Alert, { AlertColor } from '@mui/material/Alert';
 
 
 const breadcrumbLinks = [{ title: 'home', to: APP_DEFAULT_PATH }, { title: 'Demo Agents view' }];
@@ -42,8 +44,22 @@ export default function DemoAgentsViewPage() {
   const [isCallInProgress, setIsCallInProgress] = useState(false);
   const [callId, setCallId] = useState("");
   const [retellWebClient, setRetellWebClient] = useState(null);
+      const [snackbar, setSnackbar] = useState<{
+        open: boolean;
+        message: string;
+        severity: AlertColor;
+      }>({
+        open: false,
+        message: '',
+        severity: 'info',
+      });
+      
+      const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+      };
+    
 
-console.log('selectedAgent',selectedAgent)
+// console.log('selectedAgent',selectedAgent)
   useEffect(() => {
     const loadAgents = async () => {
       try {
@@ -111,98 +127,136 @@ console.log('selectedAgent',selectedAgent)
     setRetellWebClient(client);
   }, []);
 
-  const handleStartCall = async() => {
-    setCallLoading(true);
-     
-        let micPermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
-
-    if (micPermission.state !== "granted") {
-      try {
-        // Step 2: Ask for mic access
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-
-        // Step 3: Recheck permission after user action
-        micPermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
-
-        if (micPermission.state !== "granted") {
-          // Swal.fire("Microphone Required", "You must grant microphone access to start the call.", "warning");
+    const handleStartCall = async() => {
+      setCallLoading(true);
+       
+          let micPermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+  
+      if (micPermission.state !== "granted") {
+        try {
+          // Step 2: Ask for mic access
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+  
+          // Step 3: Recheck permission after user action
+          micPermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+  
+          if (micPermission.state !== "granted") {
+            setSnackbar({
+            open: true,
+            message: 'You must grant microphone access to start the call.',
+            severity: 'warning',
+          });
+        
+            return;
+          }
+        } catch (err) {
+          // User denied mic access
+          setSnackbar({
+          open: true,
+          message: 'Please allow microphone permission to continue.',
+          severity: 'error',
+           });
+             setCallLoading(false);
+          // setShowCallModal(false);
           return;
         }
-      } catch (err) {
-        // User denied mic access
-        // Swal.fire("Microphone Blocked", "Please allow microphone permission to continue.", "error");
-        // setShowCallModal(false);
-        return;
       }
-    }
-      setCallLoading(true);
-    try {
-      const agentId = selectedAgent?.agent_id;
-      if (!agentId) throw new Error("No agent ID found");
-
-      // Example: Initiate a call with Retell AI
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/agent/create-web-call`,
-        {
-          agent_id: agentId,
-          // Add other required parameters, e.g., phone number or call settings
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_RETELL_API}`,
-            "Content-Type": "application/json",
+        setCallLoading(true);
+      try {
+        const agentId = selectedAgent?.agent_id;
+        if (!agentId) throw new Error("No agent ID found");
+  
+        // Example: Initiate a call with Retell AI
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/agent/create-web-call`,
+          {
+            agent_id: agentId,
+            // Add other required parameters, e.g., phone number or call settings
           },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_RETELL_API}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setCallLoading(true);
+  
+        if (response.status == 403) {
+          setSnackbar({
+        open: true,
+        message: 'Agent Plan minutes exhausted',
+        severity: 'error',
+         });
+          setIsCallInProgress(false);
+          // setTimeout(() => {
+          //   setPopupMessage("");
+          // }, 5000);
+          return;
         }
-      );
-      setCallLoading(true);
+  
+        await retellWebClient.startCall({ accessToken: response?.data?.access_token });
+        setCallId(response?.data?.call_id);
+        setIsCallActive(true);
+      } catch (error) {
+        console.error("Error starting call:", error);
 
-      if (response.status == 403) {
-        // Swal.fire('Error', "Agent Plan minutes exhausted", 'error');
-        setIsCallInProgress(false);
-        // setTimeout(() => {
-        //   setPopupMessage("");
-        // }, 5000);
-        return;
+        if (error.status == 403) {
+        setSnackbar({
+        open: true,
+        message: 'Agent Plan minutes exhausted',
+        severity: 'error',
+         });
+          setIsCallInProgress(false);
+          // setTimeout(() => {
+          //   setPopupMessage("");
+          // }, 5000);
+          return;
+        }
+        else{
+      setSnackbar({
+      open: true,
+      message: 'Failed to start call. Please try again.',
+      severity: 'error',
+     });
+        }
+    
+      } finally {
+        setCallLoading(false);
       }
-
-      await retellWebClient.startCall({ accessToken: response?.data?.access_token });
-      setCallId(response?.data?.call_id);
-      setIsCallActive(true);
-    } catch (error) {
-      console.error("Error starting call:", error);
-      // Swal.fire("Failed to start call. Please try again.");
-    } finally {
-      setCallLoading(false);
-    }
-  };
-
-  const handleEndCall = async() => {
-    isEndingRef.current = true;
-    setCallLoading(true);
+    };
+  
+    const handleEndCall = async() => {
+      isEndingRef.current = true;
+      setCallLoading(true);
+          isEndingRef.current = false;
+      // setRefresh((prev) => !prev);
+      try {
+        // Example: End the call with Retell AI
+        // const callId = localStorage.getItem("currentCallId"); 
+        // const callId = localStorage.getItem("currentCallId"); 
+        // if (!callId) throw new Error("No call ID found");
+  
+        const response = await retellWebClient.stopCall();
+  
+        setIsCallActive(false);
         isEndingRef.current = false;
-    // setRefresh((prev) => !prev);
-    try {
-      // Example: End the call with Retell AI
-      // const callId = localStorage.getItem("currentCallId"); 
-      // const callId = localStorage.getItem("currentCallId"); 
-      // if (!callId) throw new Error("No call ID found");
-
-      const response = await retellWebClient.stopCall();
-
-      setIsCallActive(false);
-      isEndingRef.current = false;
-    } catch (error) {
-      console.error("Error ending call:", error);
-      // Swal.fire("Failed to end call. Please try again.");
-    }
-    setTimeout(() => {
-      isEndingRef.current = false;
-      setIsCallActive(false);
-      setCallLoading(false);
-      setOpenDialog(false);
-      setSelectedAgent(null);
-    }, 1000); // Simulate call ending delay
-  };
+      } catch (error) {
+        console.error("Error ending call:", error);
+        setSnackbar({
+      open: true,
+      message: 'Failed to end call. Please try again.',
+      severity: 'error',
+       });
+      }
+      setTimeout(() => {
+        isEndingRef.current = false;
+        setIsCallActive(false);
+        setCallLoading(false);
+        setOpenDialog(false);
+        setSelectedAgent(null);
+      }, 1000); // Simulate call ending delay
+    };
 
 
   return (
@@ -222,7 +276,7 @@ console.log('selectedAgent',selectedAgent)
                   <CardMedia
                     component="img"
                     height="auto"
-                    image={`/${agent?.avatar}` || '/images/male-02.png'} 
+                    image={`${agent?.avatar}` || '/images/male-02.png'} 
                     alt="Agent"
                     sx={{ width: 1, display: 'block', borderRadius: 1 }}
                   />
@@ -265,7 +319,7 @@ console.log('selectedAgent',selectedAgent)
               </MainCard>
             </Grid>
           ))}
-         { selectedAgent &&
+         {selectedAgent &&
         <CallDialog
           open={openDialog}
           onClose={handleCloseDialog}
@@ -279,6 +333,16 @@ console.log('selectedAgent',selectedAgent)
          }
         </Grid>
       )}
+           <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
