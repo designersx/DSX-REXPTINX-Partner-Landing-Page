@@ -28,7 +28,6 @@ export const fetchAgent=async()=> {
       `${process.env.NEXT_PUBLIC_API_URL}/api/agent/getKnowledgeBaseBasedUser/${userId}`
 
     );
-    console.log(res,"res")
     return res.data; // response data
   } catch (err) {
     console.error("Error fetching agent:", err);

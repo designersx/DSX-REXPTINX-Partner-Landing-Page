@@ -56,6 +56,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
     if (reason === 'backdropClick') {
       return; // Ignore backdrop clicks to prevent closing
     }
+    onEndCall();
     onClose(); // Allow closing for other reasons (e.g., close button)
   };
   return (

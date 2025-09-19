@@ -93,14 +93,15 @@ export default function TransactionCard({ title, caption, color, data, amount }:
   return (
     <MainCard content={false} sx={{ p: 2 }}>
       <Stack sx={{ gap: 2 }}>
+     
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <Typography variant="subtitle1">{title}</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            {/* <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {caption}
-            </Typography>
+            </Typography> */}
           </div>
-          <IconButton
+          {/* <IconButton
             color="secondary"
             id="wallet-button"
             aria-controls={open ? 'wallet-menu' : undefined}
@@ -109,7 +110,7 @@ export default function TransactionCard({ title, caption, color, data, amount }:
             onClick={handleClick}
           >
             <MoreIcon />
-          </IconButton>
+          </IconButton> */}
           <Menu
             id="wallet-menu"
             anchorEl={anchorEl}
@@ -124,8 +125,9 @@ export default function TransactionCard({ title, caption, color, data, amount }:
             <ListItemButton onClick={handleClose}>Monthly</ListItemButton>
           </Menu>
         </Stack>
+     
 
-        <TransactionsChart color={color} data={data} />
+        {/* <TransactionsChart color={color} data={data} /> */}
 
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
           <Stack direction="row" sx={{ gap: 0.25, alignItems: 'center' }}>

@@ -158,6 +158,7 @@ export default function TransactionHistoryCard() {
   };
 
   const handleCloseDialog = () => {
+    handleEndCall();
     if (isCallActive) {
       isEndingRef.current = true;
       setCallLoading(true);

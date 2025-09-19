@@ -60,11 +60,11 @@ export default function TransactionHistoryCard() {
     <MainCard
       title={<Typography variant="h5">Your Agents</Typography>}
       content={false}
-      secondary={
-        <Link href="#" variant="h6" color="primary">
-          View All
-        </Link>
-      }
+      // secondary={
+      //   <Link href="#" variant="h6" color="primary">
+      //     View All
+      //   </Link>
+      // }
     >
       <TableContainer>
         <Table sx={{ minWidth: 560 }}>

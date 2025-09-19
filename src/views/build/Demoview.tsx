@@ -91,6 +91,7 @@ export default function DemoAgentsViewPage() {
   };
 
   const handleCloseDialog = () => {
+     handleEndCall();
     if (isCallActive) {
       isEndingRef.current = true;
       setCallLoading(true);
