@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getUserId } from "utils/auth";
 
 // const URL = "https://rex-bk.truet.net";
 console.log(process.env.NEXT_PUBLIC_API_URL)
@@ -21,8 +22,11 @@ export const Login = async (email, password) => {
 
 export const fetchAgent=async()=> {
   try {
+    const userId=getUserId()
     const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/agent/getKnowledgeBaseBasedUser/RXC7XW1757518241`
+
+      `${process.env.NEXT_PUBLIC_API_URL}/api/agent/getKnowledgeBaseBasedUser/${userId}`
+
     );
     console.log(res,"res")
     return res.data; // response data

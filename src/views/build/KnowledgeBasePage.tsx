@@ -24,6 +24,7 @@ import { getUserId } from "utils/auth";
 import axios from "axios";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+
 export default function KnowledgeBaseUI() {
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState<any>(items[0]);
@@ -31,7 +32,9 @@ export default function KnowledgeBaseUI() {
   const [loading, setLoading] = useState(false);
   const [showAllLinks, setShowAllLinks] = useState(false);
   const userId = getUserId();
+
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
 
   useEffect(() => {
     const fetchKBs = async () => {

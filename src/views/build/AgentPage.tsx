@@ -1,3 +1,4 @@
+'use client';
 // material-ui
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
@@ -21,9 +22,11 @@ import AgentGeneralInfoModal from './AgentgeneralinfoModal';
 
 // assets
 import {Add, Edit, Eye, Trash } from '@wandersonalwes/iconsax-react';
+
 import { useEffect, useRef, useState } from 'react';
 import CallDialog from 'components/CallDialog';
 import { RetellWebClient } from "retell-client-js-sdk";
+
 import { useRouter } from 'next/navigation';
 import { fetchAgent } from '../../../Services/auth';
 const Avatar1 = '/assets/images/avatrs/Female-01.png';
@@ -62,8 +65,12 @@ const rows = [
 ];
 
 export default function TransactionHistoryCard() {
+
     const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+const[loading,setLoading]=useState(false)
+
     const [agents, setAgents] = useState<any[]>([]); // store API data
   
     const [openDialog, setOpenDialog] = useState(false);
@@ -109,6 +116,7 @@ export default function TransactionHistoryCard() {
     }, []);
  
 
+
   const handleCreateAgentClick = () => {
     console.log('ddsds',isModalOpen);
     setIsModalOpen(true);
@@ -124,6 +132,23 @@ export default function TransactionHistoryCard() {
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
+   useEffect(() => {
+    const loadAgents = async () => {
+      try {
+        const res = await fetchAgent(); // ✅ call your API function
+        console.log("API response:", res);
+
+        // Assuming res is an array of agents
+        setAgents(res?.agents||[]);
+      } catch (err) {
+        console.error("Error fetching agents:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAgents();
+  }, []);
 
     
     const handleOpenDialog = (agent: any) => {
@@ -322,43 +347,67 @@ export default function TransactionHistoryCard() {
           <Table sx={{ minWidth: 560 }}>
             <TableHead>
               <TableRow>
+                <TableCell>Image</TableCell>
                 <TableCell>Agent Name</TableCell>
                 <TableCell>Business Name</TableCell>
                 <TableCell>Business Category</TableCell>
                 <TableCell>Date/Time</TableCell>
+
                 <TableCell align="center">Mins Assigned</TableCell>
                 <TableCell align="center">Mins Remaining</TableCell>
                 <TableCell align="center">Status</TableCell>
+
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, index) => (
+              {agents.map((row, index) => (
                 <TableRow hover key={index}>
                   <TableCell align="center">
                     <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
-                      <Avatar alt={row.name} src={row.avatar} />
-                      <Typography>{row.name}</Typography>
+                      <Avatar alt={row.agentName} src={`/${row.avatar}`} />
+                     
+                    </Stack>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
+                     
+                      <Typography>{row.agentName}</Typography>
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <Typography>{row.position}</Typography>
+                    <Typography>{row?.businessDetails?.name}</Typography>
                   </TableCell>
                   <TableCell>
                     <Typography>{row.position}</Typography>
                   </TableCell>
                   <TableCell>
                     <Stack>
-                      <Typography>{row.date}</Typography>
+                      <Typography>{row.createdAt}</Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        {row.time}
+                        {row.createdAt}
                       </Typography>
                     </Stack>
                   </TableCell>
                   <TableCell align="center">
-                    <Typography>{row.Amount}</Typography>
+                    <Typography>{row.mins_left}</Typography>
                   </TableCell>
                   <TableCell align="center">
+<!-- <<<<<<< dev_ronak
+                    <Chip size="small" color="grey" label={row?.agentAccent} />
+                  </TableCell>
+                  <TableCell>
+                    <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+                     <Tooltip title="View call history">
+      <IconButton 
+        color="secondary" 
+        onClick={() => router.push("/build/agents/calldetails")} 
+      >
+        <Eye />
+      </IconButton>
+    </Tooltip>
+                      {/* <Tooltip title="Edit">
+======= -->
                     <Typography>{row.Amount}</Typography>
                   </TableCell>
                   <TableCell align="center">
@@ -385,6 +434,7 @@ export default function TransactionHistoryCard() {
                       </IconButton>
                     </Tooltip>
                       <Tooltip title="Edit">
+
                         <IconButton color="primary">
                           <Edit />
                         </IconButton>
@@ -393,7 +443,7 @@ export default function TransactionHistoryCard() {
                         <IconButton color="error">
                           <Trash />
                         </IconButton>
-                      </Tooltip>
+                      </Tooltip> */}
                     </Stack>
                   </TableCell>
                 </TableRow>
