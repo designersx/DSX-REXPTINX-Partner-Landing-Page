@@ -47,8 +47,8 @@ const CallDialog: React.FC<CallDialogProps> = ({
   onEndCall,
   isEndingRef,
 }) => {
-  const displayAgentName = agent?.agentName && agent.agentName.length > 15 
-    ? agent.agentName.slice(0, 12) + "..." 
+  const displayAgentName = agent?.agentName && agent.agentName.length > 15
+    ? agent.agentName.slice(0, 12) + "..."
     : agent?.agentName || "Agent";
   const displayBusinessName = agent?.businessDetails?.name || agent?.company || "Enterprise";
 
@@ -84,7 +84,13 @@ const CallDialog: React.FC<CallDialogProps> = ({
         <Box sx={{ mb: 3 }}>
           <CardMedia
             component="img"
-            image={`/${agent?.avatar}` || '/images/male-02.png'}
+            image={
+              agent?.avatar
+                ? agent.avatar.startsWith("/")
+                  ? agent.avatar
+                  : `/${agent.avatar}`
+                : "/images/male-02.png"
+            }
             alt={displayAgentName}
             sx={{
               width: 80,
@@ -97,6 +103,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
             }}
           />
         </Box>
+
         <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
           {displayAgentName}
         </Typography>

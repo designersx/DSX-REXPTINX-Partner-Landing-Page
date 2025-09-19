@@ -89,3 +89,17 @@ export async function getAvailableMinutes(userId) {
     throw error;
   }
 }
+ export const getAgentCallById = async (agentId, callId, start_timestamp) => {
+          try {
+            // const res = await api.get(`/agent/user/${userId}/agent/calls`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/callHistory/getSpecificCallData/call/${agentId}/${callId}?start_timestamp=${start_timestamp}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+              },
+            });
+            return res.data;
+          } catch (error) {
+            console.error("Error fetching agent calls:", error.response?.data || error.message);
+            throw new Error("Failed to fetch agent calls");
+          }
+        };

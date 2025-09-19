@@ -76,6 +76,7 @@ export default function TransactionHistoryCard() {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<any>(null);
+
   const [isCallActive, setIsCallActive] = useState(false);
   const [callLoading, setCallLoading] = useState(false);
   const isEndingRef = useRef(false);
@@ -232,6 +233,7 @@ export default function TransactionHistoryCard() {
     setCallLoading(true);
     try {
       const agentId = selectedAgent?.agent_id;
+   
       if (!agentId) throw new Error("No agent ID found");
 
       // Example: Initiate a call with Retell AI
@@ -326,129 +328,136 @@ export default function TransactionHistoryCard() {
     }, 1000); // Simulate call ending delay
   };
 
- return (
-  <>
-    <MainCard
-      title={<Typography variant="h5">Your Agents</Typography>}
-      content={false}
-      secondary={
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          size="large"
-          onClick={handleCreateAgentClick}
-        >
-          <Link
-            href="#"
-            variant="h5"
-            color="white"
-            component="button"
-            sx={{ textDecoration: "none" }}
+
+
+
+  return (
+    <>
+      <MainCard
+        title={<Typography variant="h5">Your Agents</Typography>}
+        content={false}
+        secondary={
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            size="large"
+            onClick={handleCreateAgentClick}
           >
-            Create Agent
-          </Link>
-        </Button>
-      }
-    >
-      <TableContainer>
-        <Table sx={{ minWidth: 560 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Image</TableCell>
-              <TableCell>Agent Name</TableCell>
-              <TableCell>Business Name</TableCell>
-              <TableCell>Business Category</TableCell>
-              <TableCell>Date/Time</TableCell>
-              <TableCell align="center">Mins Assigned</TableCell>
-              <TableCell align="center">Mins Remaining</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {agents.map((row, index) => (
-              <TableRow hover key={index}>
-                {/* Image */}
-                <TableCell align="center">
-                  <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
-                    <Avatar alt={row.agentName} src={`/${row.avatar}`} />
-                  </Stack>
-                </TableCell>
-
-                {/* Agent Name */}
-                <TableCell align="center">
-                  <Typography>{row.agentName}</Typography>
-                </TableCell>
-
-                {/* Business Name */}
-                <TableCell>
-                  <Typography>{row?.businessDetails?.name}</Typography>
-                </TableCell>
-
-                {/* Business Category */}
-                <TableCell>
-                  <Typography>{row.position}</Typography>
-                </TableCell>
-
-                {/* Date/Time */}
-                <TableCell>
-                  <Stack>
-                    <Typography>{row.createdAt}</Typography>
-                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                      {row.createdAt}
-                    </Typography>
-                  </Stack>
-                </TableCell>
-
-                {/* Mins Assigned */}
-                <TableCell align="center">
-                  <Typography>{row.planMinutes}</Typography>
-                </TableCell>
-
-                {/* Mins Remaining */}
-                <TableCell align="center">
-                  <Typography>{row.mins_left}</Typography>
-                </TableCell>
-
-                {/* Status */}
-                <TableCell align="center">
-                  <Chip size="small" color="grey" label={row?.agentAccent} />
-                </TableCell>
-
-                {/* Action */}
-                <TableCell align="center">
-                  <Stack
-                    direction="row"
-                    sx={{ alignItems: "center", justifyContent: "center", gap: 1 }}
-                  >
-                    <Tooltip title="View call history">
-                      <IconButton
-                        color="secondary"
-                        onClick={() => router.push("/build/agents/calldetails")}
-                      >
-                        <Eye />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Test Call">
-                      <Chip
-                        size="small"
-                        color={getValidColor("primary")}
-                        label="Test Call"
-                        onClick={() => handleOpenDialog(row)}
+            <Link
+              href="#"
+              variant="h5"
+              color="white"
+              component="button"
+              sx={{ textDecoration: "none" }}
+            >
+              Create Agent
+            </Link>
+          </Button>
+        }
+      >
+        <TableContainer>
+          <Table sx={{ minWidth: 560 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Image</TableCell>
+                <TableCell>Agent Name</TableCell>
+                <TableCell>Business Name</TableCell>
+                <TableCell>Business Category</TableCell>
+                <TableCell>Date/Time</TableCell>
+                <TableCell align="center">Mins Assigned</TableCell>
+                <TableCell align="center">Mins Remaining</TableCell>
+                <TableCell align="center">Status</TableCell>
+                <TableCell align="center">Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {agents.map((row, index) => (
+                <TableRow hover key={index}>
+                  {/* Image */}
+                  <TableCell align="center">
+                    <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
+                      <Avatar
+                        alt={row.agentName}
+                        src={row.avatar?.startsWith("/") ? row.avatar : `/${row.avatar}`}
                       />
-                    </Tooltip>
 
-                    <Tooltip title="View">
+                    </Stack>
+                  </TableCell>
+
+                  {/* Agent Name */}
+                  <TableCell align="center">
+                    <Typography>{row.agentName}</Typography>
+                  </TableCell>
+
+                  {/* Business Name */}
+                  <TableCell>
+                    <Typography>{row?.businessDetails?.name}</Typography>
+                  </TableCell>
+
+                  {/* Business Category */}
+                  <TableCell>
+                    <Typography>{row.position}</Typography>
+                  </TableCell>
+
+                  {/* Date/Time */}
+                  <TableCell>
+                    <Stack>
+                      <Typography>{row.createdAt}</Typography>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        {row.createdAt}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+
+                  {/* Mins Assigned */}
+                  <TableCell align="center">
+                    <Typography>{row.planMinutes}</Typography>
+                  </TableCell>
+
+                  {/* Mins Remaining */}
+                  <TableCell align="center">
+                    <Typography>{row.mins_left}</Typography>
+                  </TableCell>
+
+                  {/* Status */}
+                  <TableCell align="center">
+                    <Chip size="small" color="grey" label={row?.agentAccent} />
+                  </TableCell>
+
+                  {/* Action */}
+                  <TableCell align="center">
+                    <Stack
+                      direction="row"
+                      sx={{ alignItems: "center", justifyContent: "center", gap: 1 }}
+                    >
+                      <Tooltip title="View call history">
+                        <IconButton
+                          color="secondary"
+                          onClick={() => router.push(`/build/agents/calldetails/${row?.agent_id}`)}
+                        >
+                          <Eye />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Test Call">
+                        <Chip
+                          size="small"
+                          color={getValidColor("primary")}
+                          label="Test Call"
+                          onClick={() => handleOpenDialog(row)}
+                        />
+                      </Tooltip>
+
+                      {/* <Tooltip title="View">
                       <IconButton
                         color="secondary"
                         onClick={() => router.push("/build/agents/editagent")}
                       >
                         <Eye />
                       </IconButton>
-                    </Tooltip>
+                    </Tooltip> */}
 
-                    <Tooltip title="Edit">
+                      {/* <Tooltip title="Edit">
                       <IconButton color="primary">
                         <Edit />
                       </IconButton>
@@ -458,52 +467,52 @@ export default function TransactionHistoryCard() {
                       <IconButton color="error">
                         <Trash />
                       </IconButton>
-                    </Tooltip>
-                  </Stack>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </MainCard>
+                    </Tooltip> */}
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </MainCard>
 
-    {/* Call Dialog */}
-    {selectedAgent && (
-      <CallDialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        agent={selectedAgent}
-        isCallActive={isCallActive}
-        callLoading={callLoading}
-        onStartCall={handleStartCall}
-        onEndCall={handleEndCall}
-        isEndingRef={isEndingRef}
+      {/* Call Dialog */}
+      {selectedAgent && (
+        <CallDialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          agent={selectedAgent}
+          isCallActive={isCallActive}
+          callLoading={callLoading}
+          onStartCall={handleStartCall}
+          onEndCall={handleEndCall}
+          isEndingRef={isEndingRef}
+        />
+      )}
+
+      {/* Agent Creation Modal */}
+      <AgentGeneralInfoModal
+        open={isModalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleAgentSubmit}
       />
-    )}
 
-    {/* Agent Creation Modal */}
-    <AgentGeneralInfoModal
-      open={isModalOpen}
-      onClose={handleModalClose}
-      onSubmit={handleAgentSubmit}
-    />
-
-    {/* Snackbar */}
-    <Snackbar
-      open={snackbar.open}
-      autoHideDuration={6000}
-      onClose={handleCloseSnackbar}
-      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-    >
-      <Alert
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        severity={snackbar.severity}
-        sx={{ width: "100%" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        {snackbar.message}
-      </Alert>
-    </Snackbar>
-  </>
-)
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
+  )
 }
