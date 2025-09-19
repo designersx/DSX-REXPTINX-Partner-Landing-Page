@@ -13,7 +13,8 @@ import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-
+import Snackbar from '@mui/material/Snackbar';
+import Alert, { AlertColor } from '@mui/material/Alert';
 // project-imports
 import IconButton from 'components/@extended/IconButton';
 import MainCard from 'components/MainCard';
@@ -21,7 +22,10 @@ import AgentGeneralInfoModal from './AgentgeneralinfoModal';
 
 // assets
 import {Add, Edit, Eye, Trash } from '@wandersonalwes/iconsax-react';
-import { useEffect, useState } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
+import CallDialog from 'components/CallDialog';
+import { RetellWebClient } from "retell-client-js-sdk";
 
 import { useRouter } from 'next/navigation';
 import { fetchAgent } from '../../../Services/auth';
@@ -64,8 +68,54 @@ export default function TransactionHistoryCard() {
 
     const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const[agents,setAgents]=useState([])
+
 const[loading,setLoading]=useState(false)
+
+    const [agents, setAgents] = useState<any[]>([]); // store API data
+  
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedAgent, setSelectedAgent] = useState<any>(null);
+    const [isCallActive, setIsCallActive] = useState(false);
+    const [callLoading, setCallLoading] = useState(false);
+    const isEndingRef = useRef(false);
+    const [isCallInProgress, setIsCallInProgress] = useState(false);
+    const [callId, setCallId] = useState("");
+    const [retellWebClient, setRetellWebClient] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [snackbar, setSnackbar] = useState<{
+      open: boolean;
+      message: string;
+      severity: AlertColor;
+    }>({
+      open: false,
+      message: '',
+      severity: 'info',
+    });
+    
+    const handleCloseSnackbar = () => {
+      setSnackbar({ ...snackbar, open: false });
+    };
+  
+  console.log('selectedAgent',selectedAgent)
+    useEffect(() => {
+      const loadAgents = async () => {
+        try {
+          const res = await fetchAgent(); // ✅ call your API function
+          console.log("API response:", res);
+  
+          // Assuming res is an array of agents
+          setAgents(res?.agents||[]);
+        } catch (err) {
+          console.error("Error fetching agents:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      loadAgents();
+    }, []);
+ 
+
 
   const handleCreateAgentClick = () => {
     console.log('ddsds',isModalOpen);
@@ -100,6 +150,180 @@ const[loading,setLoading]=useState(false)
     loadAgents();
   }, []);
 
+    
+    const handleOpenDialog = (agent: any) => {
+      setSelectedAgent(agent);
+      setOpenDialog(true);
+    };
+  
+    const handleCloseDialog = () => {
+      if (isCallActive) {
+        isEndingRef.current = true;
+        setCallLoading(true);
+        setTimeout(() => {
+          isEndingRef.current = false;
+          setIsCallActive(false);
+          setCallLoading(false);
+          setOpenDialog(false);
+          setSelectedAgent(null);
+        }, 1000); // Simulate call ending delay
+      } else {
+        setOpenDialog(false);
+        setSelectedAgent(null);
+      }
+    };
+  
+      useEffect(() => {
+      const client = new RetellWebClient();
+      client.on("call_started", () => setIsCallActive(true));
+      client.on("call_ended", () => setIsCallActive(false));
+      client.on("update", (update) => {
+        //  Mark the update clearly as AGENT message
+        const customUpdate = {
+          ...update,
+          source: "agent", // Add explicit source
+        };
+  
+        // Dispatch custom event for CallTest
+        window.dispatchEvent(
+          new CustomEvent("retellUpdate", { detail: customUpdate })
+        );
+      });
+  
+      setRetellWebClient(client);
+    }, []);
+  
+      const handleStartCall = async() => {
+      setCallLoading(true);
+       
+          let micPermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+  
+      if (micPermission.state !== "granted") {
+        try {
+          // Step 2: Ask for mic access
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+  
+          // Step 3: Recheck permission after user action
+          micPermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+  
+          if (micPermission.state !== "granted") {
+            setSnackbar({
+            open: true,
+            message: 'You must grant microphone access to start the call.',
+            severity: 'warning',
+          });
+        
+            return;
+          }
+        } catch (err) {
+          // User denied mic access
+          setSnackbar({
+          open: true,
+          message: 'Please allow microphone permission to continue.',
+          severity: 'error',
+           });
+             setCallLoading(false);
+          // setShowCallModal(false);
+          return;
+        }
+      }
+        setCallLoading(true);
+      try {
+        const agentId = selectedAgent?.agent_id;
+        if (!agentId) throw new Error("No agent ID found");
+  
+        // Example: Initiate a call with Retell AI
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/agent/create-web-call`,
+          {
+            agent_id: agentId,
+            // Add other required parameters, e.g., phone number or call settings
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_RETELL_API}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setCallLoading(true);
+  
+        if (response.status == 403) {
+          setSnackbar({
+        open: true,
+        message: 'Agent Plan minutes exhausted',
+        severity: 'error',
+         });
+          setIsCallInProgress(false);
+          // setTimeout(() => {
+          //   setPopupMessage("");
+          // }, 5000);
+          return;
+        }
+  
+        await retellWebClient.startCall({ accessToken: response?.data?.access_token });
+        setCallId(response?.data?.call_id);
+        setIsCallActive(true);
+      } catch (error) {
+        console.error("Error starting call:", error);
+
+        if (error.status == 403) {
+        setSnackbar({
+        open: true,
+        message: 'Agent Plan minutes exhausted',
+        severity: 'error',
+         });
+          setIsCallInProgress(false);
+          // setTimeout(() => {
+          //   setPopupMessage("");
+          // }, 5000);
+          return;
+        }
+        else{
+      setSnackbar({
+      open: true,
+      message: 'Failed to start call. Please try again.',
+      severity: 'error',
+     });
+        }
+    
+      } finally {
+        setCallLoading(false);
+      }
+    };
+  
+    const handleEndCall = async() => {
+      isEndingRef.current = true;
+      setCallLoading(true);
+          isEndingRef.current = false;
+      // setRefresh((prev) => !prev);
+      try {
+        // Example: End the call with Retell AI
+        // const callId = localStorage.getItem("currentCallId"); 
+        // const callId = localStorage.getItem("currentCallId"); 
+        // if (!callId) throw new Error("No call ID found");
+  
+        const response = await retellWebClient.stopCall();
+  
+        setIsCallActive(false);
+        isEndingRef.current = false;
+      } catch (error) {
+        console.error("Error ending call:", error);
+        setSnackbar({
+      open: true,
+      message: 'Failed to end call. Please try again.',
+      severity: 'error',
+       });
+      }
+      setTimeout(() => {
+        isEndingRef.current = false;
+        setIsCallActive(false);
+        setCallLoading(false);
+        setOpenDialog(false);
+        setSelectedAgent(null);
+      }, 1000); // Simulate call ending delay
+    };
+
   return (
     <>
       <MainCard
@@ -125,10 +349,14 @@ const[loading,setLoading]=useState(false)
               <TableRow>
                 <TableCell>Image</TableCell>
                 <TableCell>Agent Name</TableCell>
-                <TableCell>Business</TableCell>
+                <TableCell>Business Name</TableCell>
+                <TableCell>Business Category</TableCell>
                 <TableCell>Date/Time</TableCell>
-                <TableCell align="center">Mins Assign</TableCell>
-                <TableCell align="center">Agent Accent</TableCell>
+
+                <TableCell align="center">Mins Assigned</TableCell>
+                <TableCell align="center">Mins Remaining</TableCell>
+                <TableCell align="center">Status</TableCell>
+
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
@@ -151,6 +379,9 @@ const[loading,setLoading]=useState(false)
                     <Typography>{row?.businessDetails?.name}</Typography>
                   </TableCell>
                   <TableCell>
+                    <Typography>{row.position}</Typography>
+                  </TableCell>
+                  <TableCell>
                     <Stack>
                       <Typography>{row.createdAt}</Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -162,6 +393,7 @@ const[loading,setLoading]=useState(false)
                     <Typography>{row.mins_left}</Typography>
                   </TableCell>
                   <TableCell align="center">
+<!-- <<<<<<< dev_ronak
                     <Chip size="small" color="grey" label={row?.agentAccent} />
                   </TableCell>
                   <TableCell>
@@ -175,6 +407,34 @@ const[loading,setLoading]=useState(false)
       </IconButton>
     </Tooltip>
                       {/* <Tooltip title="Edit">
+======= -->
+                    <Typography>{row.Amount}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Chip size="small" color={getValidColor(row.color)} label={row.status} />
+                  </TableCell>
+                  <TableCell>
+                    <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+                     <Tooltip title="Test Call">
+                      {/* <IconButton 
+                        color="primary" 
+                        // onClick={() => router.push("/build/agents/editagent")} 
+                      >
+                        <Eye />
+                      </IconButton> */}
+                      <Chip size="small" color={getValidColor('primary')} label={'Test Call'} onClick={() => handleOpenDialog(row)} />
+
+                    </Tooltip>
+                     <Tooltip title="View">
+                      <IconButton 
+                        color="secondary" 
+                        onClick={() => router.push("/build/agents/editagent")} 
+                      >
+                        <Eye />
+                      </IconButton>
+                    </Tooltip>
+                      <Tooltip title="Edit">
+
                         <IconButton color="primary">
                           <Edit />
                         </IconButton>
@@ -193,12 +453,36 @@ const[loading,setLoading]=useState(false)
         </TableContainer>
       </MainCard>
 
+      {selectedAgent &&
+    <CallDialog
+      open={openDialog}
+      onClose={handleCloseDialog}
+      agent={selectedAgent}
+      isCallActive={isCallActive}
+      callLoading={callLoading}
+      onStartCall={handleStartCall}
+      onEndCall={handleEndCall}
+      isEndingRef={isEndingRef}
+    />
+      }
+
       {/* Agent Creation Modal */}
       <AgentGeneralInfoModal
         open={isModalOpen}
         onClose={handleModalClose}
         onSubmit={handleAgentSubmit}
       />
+
+      <Snackbar
+  open={snackbar.open}
+  autoHideDuration={6000}
+  onClose={handleCloseSnackbar}
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+>
+  <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+    {snackbar.message}
+  </Alert>
+</Snackbar>
     </>
   );
 }

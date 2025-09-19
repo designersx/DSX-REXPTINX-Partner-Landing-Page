@@ -24,7 +24,9 @@ export const fetchAgent=async()=> {
   try {
     const userId=getUserId()
     const res = await axios.get(
+
       `${process.env.NEXT_PUBLIC_API_URL}/api/agent/getKnowledgeBaseBasedUser/${userId}`
+
     );
     console.log(res,"res")
     return res.data; // response data
@@ -76,3 +78,15 @@ export const AddKB = async (formData) => {
     return { valid: false, reason: 'Error validating website' };
   }
 };
+export async function getAvailableMinutes(userId) {
+  try {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/enterpriseAgent/getAvailableMinutes/${userId}`,
+   
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching available minutes:", error);
+    throw error;
+  }
+}

@@ -32,7 +32,9 @@ export default function KnowledgeBaseUI() {
   const [loading, setLoading] = useState(false);
   const [showAllLinks, setShowAllLinks] = useState(false);
   const userId = getUserId();
-  
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
 
   useEffect(() => {
     const fetchKBs = async () => {
@@ -48,10 +50,13 @@ export default function KnowledgeBaseUI() {
             ...kb, // ✅ keep original fields like text, webUrl, scrapedUrls
             name: kb.kbName,
             id: `know...${kb.kbId}`,
-            uploadedAt: new Date(kb.createdAt)
-              .toISOString()
-              .slice(0, 16)
-              .replace("T", " "),
+            uploadedAt: new Date(kb.createdAt).toLocaleString([], {
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
             details: [
               // scrapedUrls → URLs
               ...(kb.scrapedUrls
@@ -97,9 +102,20 @@ export default function KnowledgeBaseUI() {
 
   return (
     <>
-      <Grid container spacing={2} sx={{ height: "100%" }}>
+      {/* ✅ Wrapper Box for responsive flex */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column", // default mobile
+          gap: 2,
+          "@media (min-width:650px)": {
+            flexDirection: "row", // desktop/tablet
+          },
+          height: "100%",
+        }}
+      >
         {/* Left Panel - Knowledge Base List */}
-        <Grid item xs={12} md={3}>
+        <Box sx={{ flex: { xs: "1 1 100%", md: "0 0 30%" } }}>
           <Paper
             sx={{
               p: 2,
@@ -117,7 +133,11 @@ export default function KnowledgeBaseUI() {
               <Typography variant="subtitle1" fontWeight="bold">
                 Knowledge Base
               </Typography>
-              <IconButton color="warning" size="large" onClick={() => setOpen(true)}>
+              <IconButton
+                color="warning"
+                size="large"
+                onClick={() => setOpen(true)}
+              >
                 <AddIcon />
               </IconButton>
             </Box>
@@ -132,7 +152,9 @@ export default function KnowledgeBaseUI() {
                     mb: 0.5,
                     "&:hover": { bgcolor: "action.hover" },
                     bgcolor:
-                      selectedItem?.name === item.name ? "action.selected" : "inherit",
+                      selectedItem?.name === item.name
+                        ? "action.selected"
+                        : "inherit",
                   }}
                 >
                   <ListItemIcon>
@@ -154,10 +176,10 @@ export default function KnowledgeBaseUI() {
               ))}
             </List>
           </Paper>
-        </Grid>
+        </Box>
 
         {/* Right Panel - Details */}
-        <Grid item xs={12} md={9}>
+        <Box sx={{ flex: { xs: "1 1 100%", md: "0 0 70%" } }}>
           {selectedItem ? (
             <Paper
               sx={{
@@ -177,15 +199,17 @@ export default function KnowledgeBaseUI() {
                 <Box>
                   <Typography variant="h6">{selectedItem.name}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    ID: {selectedItem.id} • Uploaded at: {selectedItem.uploadedAt}
+                    ID: {selectedItem.id} • Uploaded at:{" "}
+                    {selectedItem.uploadedAt}
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={1}>
-                  <IconButton color="primary" size="small">
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => setOpenDeleteDialog(true)}
+                  >
                     <DeleteIcon />
-                  </IconButton>
-                  <IconButton color="secondary" size="small">
-                    <DownloadIcon />
                   </IconButton>
                 </Stack>
               </Stack>
@@ -221,7 +245,7 @@ export default function KnowledgeBaseUI() {
                       {selectedItem.webUrl}
                     </Typography>
                   </Stack>
-                  {selectedItem.scrapedUrls && (
+                  {selectedItem.details?.length > 0 && (
                     <Button
                       size="small"
                       variant="outlined"
@@ -233,38 +257,80 @@ export default function KnowledgeBaseUI() {
                 </Paper>
               )}
 
-              {/* ✅ All Scraped Links */}
-              {showAllLinks &&
-                selectedItem.scrapedUrls &&
-                JSON.parse(selectedItem.scrapedUrls).map((url: string, idx: number) => (
-                  <Paper
-                    key={idx}
-                    sx={{
-                      p: 2,
-                      mb: 1,
-                      borderRadius: 2,
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <LinkIcon color="disabled" />
-                    <Typography
-                      component="a"
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+              {/* ✅ All Details */}
+              {showAllLinks && (
+                <Stack spacing={2} mt={2}>
+                  {selectedItem.details.map((d: any, i: number) => (
+                    <Paper
+                      key={i}
                       sx={{
-                        ml: 1,
-                        fontSize: 14,
-                        color: "text.primary",
-                        textDecoration: "none",
-                        "&:hover": { textDecoration: "underline" },
+                        p: 2,
+                        borderRadius: 2,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
                       }}
                     >
-                      {url}
-                    </Typography>
-                  </Paper>
-                ))}
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        {d.type === "url" ? (
+                          <>
+                            <LinkIcon color="warning" />
+                            <Box>
+                              <Typography
+                                fontWeight={500}
+                                component="a"
+                                href={
+                                  d.value.startsWith("http")
+                                    ? d.value
+                                    : `https://${d.value}`
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{
+                                  textDecoration: "none",
+                                  color: "primary.main",
+                                  cursor: "pointer",
+                                  "&:hover": { textDecoration: "underline" },
+                                }}
+                              >
+                                {d.value}
+                              </Typography>
+                            </Box>
+                          </>
+                        ) : (
+                          <>
+                            <InsertDriveFileIcon color="error" />
+                            <Box>
+                              <Typography
+                                fontWeight={500}
+                                sx={{
+                                  cursor: "pointer",
+                                  color: "text.primary",
+                                  "&:hover": { textDecoration: "underline" },
+                                }}
+                                onClick={() => {
+                                  window.open(
+                                    `${process.env.NEXT_PUBLIC_API_URL}/uploads/${d.value}`,
+                                    "_blank"
+                                  );
+                                }}
+                              >
+                                {d.value}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {d.size}
+                              </Typography>
+                            </Box>
+                          </>
+                        )}
+                      </Stack>
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
 
               {/* ✅ Download text file */}
               {selectedItem.text && (
@@ -291,76 +357,6 @@ export default function KnowledgeBaseUI() {
                   </Button>
                 </Paper>
               )}
-
-              {/* ✅ Old details list (files, etc.) */}
-              <Stack spacing={2} mt={2}>
-                {selectedItem.details.map((d: any, i: number) => (
-                  <Paper
-                    key={i}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      {d.type === "url" ? (
-                        <>
-                          <LinkIcon color="warning" />
-                          <Box>
-                            <Typography
-                              fontWeight={500}
-                              component="a"
-                              href={
-                                d.value.startsWith("http")
-                                  ? d.value
-                                  : `https://${d.value}`
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              sx={{
-                                textDecoration: "none",
-                                color: "primary.main",
-                                cursor: "pointer",
-                                "&:hover": { textDecoration: "underline" },
-                              }}
-                            >
-                              {d.value}
-                            </Typography>
-                          </Box>
-                        </>
-                      ) : (
-                        <>
-                          <InsertDriveFileIcon color="error" />
-                          <Box>
-                            <Typography
-                              fontWeight={500}
-                              sx={{
-                                cursor: "pointer",
-                                color: "text.primary",
-                                "&:hover": { textDecoration: "underline" },
-                              }}
-                              onClick={() => {
-                                window.open(
-                                  `${process.env.NEXT_PUBLIC_API_URL}/uploads/${d.value}`,
-                                  "_blank"
-                                );
-                              }}
-                            >
-                              {d.value}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {d.size}
-                            </Typography>
-                          </Box>
-                        </>
-                      )}
-                    </Stack>
-                  </Paper>
-                ))}
-              </Stack>
             </Paper>
           ) : (
             <Paper
@@ -379,8 +375,9 @@ export default function KnowledgeBaseUI() {
               </Typography>
             </Paper>
           )}
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
+
       <BasicModal open={open} onClose={() => setOpen(false)} />
     </>
   );

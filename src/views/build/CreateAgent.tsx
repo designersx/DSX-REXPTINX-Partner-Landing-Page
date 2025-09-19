@@ -1,443 +1,4 @@
-// "use client";
-
-// import { useState } from "react";
-// import {
-//   Grid,
-//   TextField,
-//   InputLabel,
-//   MenuItem,
-//   Select,
-//   FormHelperText,
-//   Button,
-//   Stack,
-//   Typography,
-//   Chip,
-// } from "@mui/material";
-// import { Paper, Divider } from "@mui/material";
-// import MainCard from "components/MainCard";
-// import { GRID_COMMON_SPACING } from "config";
-
-// // ---------------- Business Data ----------------
-// const allBusinessTypes = [
-//   {
-//     type: "Electronics & Home Appliances",
-//     subtype: "Consumer Electronics Retailer",
-//     icon: "svg/Electronics-icon.svg",
-//   },
-//   {
-//     type: "Banking",
-//     subtype: "Financial Institution",
-//     icon: "svg/Banking-icon.svg",
-//   },
-//   {
-//     type: "D2C E-commerce",
-//     subtype: "Direct to Consumer Online Brand",
-//     icon: "svg/Ecommerce-icon.svg",
-//   },
-//   {
-//     type: "B2B/B2C Marketplace",
-//     subtype: "Online Wholesale/Retail Platform",
-//     icon: "svg/Marketplace-icon.svg",
-//   },
-//   {
-//     type: "Insurance",
-//     subtype: "Risk & Coverage Services",
-//     icon: "svg/Insurance-icon.svg",
-//   },
-//   {
-//     type: "Restaurant",
-//     subtype: "Food Service Establishment",
-//     icon: "svg/Restaurant-icon.svg",
-//   },
-//   {
-//     type: "Real Estate Broker",
-//     subtype: "Property Transaction Facilitator",
-//     icon: "svg/Estate-icon.svg",
-//   },
-// ];
-
-// const businessServices = [
-//   {
-//     type: "Electronics & Home Appliances",
-//     services: [
-//       "Mobile Phones",
-//       "Air Conditioners",
-//       "Refrigerators",
-//       "Washing Machines",
-//       "Smart TVs",
-//       "Laptops",
-//       "Other",
-//     ],
-//   },
-//   {
-//     type: "Banking",
-//     services: [
-//       "Savings Account",
-//       "Credit Cards",
-//       "Loans",
-//       "Fixed Deposits",
-//       "Net Banking/UPI",
-//       "Wealth Management",
-//       "Other",
-//     ],
-//   },
-//   {
-//     type: "D2C E-commerce",
-//     services: [
-//       "Fashion & Apparel",
-//       "Footwear",
-//       "Skincare & Beauty",
-//       "Electronics Accessories",
-//       "Home & Kitchen Essentials",
-//       "Nutritional Supplements",
-//       "Other",
-//     ],
-//   },
-//   {
-//     type: "B2B/B2C Marketplace",
-//     services: [
-//       "Wholesale Electronics",
-//       "Industrial Equipment",
-//       "Office Supplies",
-//       "Furniture",
-//       "FMCG Products",
-//       "Agricultural Goods",
-//       "Other",
-//     ],
-//   },
-//   {
-//     type: "Insurance",
-//     services: [
-//       "Health Insurance",
-//       "Life Insurance",
-//       "Vehicle Insurance",
-//       "Travel Insurance",
-//       "Property Insurance",
-//       "Business Insurance",
-//       "Other",
-//     ],
-//   },
-//   {
-//     type: "Restaurant",
-//     services: [
-//       "Dine-in Service",
-//       "Takeaway Orders",
-//       "Home Delivery",
-//       "Event Catering",
-//       "Online Ordering",
-//       "Other",
-//     ],
-//   },
-//   {
-//     type: "Real Estate Broker",
-//     services: [
-//       "Property Sales",
-//       "Property Rentals",
-//       "Property Viewings",
-//       "Price Valuation",
-//       "Legal Help",
-//       "Other",
-//     ],
-//   },
-// ];
-
-// // ---------------- Helper Function ----------------
-// function getServicesByType(type) {
-//   const found = businessServices.find((b) => b.type === type);
-//   return found ? found.services : [];
-// }
-
-// // ---------------- Main Component ----------------
-// export default function AgentGeneralInfo({ onNext }) {
-//   const [formData, setFormData] = useState({
-//     agentName: "",
-//     corePurpose: "",
-//     industry: "",
-//     service: [], // Changed to an array to store multiple services
-//     customService: "",
-//     businessName: "",
-//     agentType: "",
-//     agentLanguage: "",
-//   });
-
-//   const [errors, setErrors] = useState({});
-
-//   const purposes = [
-//     "Customer Support",
-//     "Lead Qualifier",
-//     "Survey Agent",
-//     "Technical Support",
-//     "General Receptionist",
-//   ];
-
-//   const agentTypes = ["Inbound", "Outbound", "Both"];
-//   const languages = ["Hindi", "English"];
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData({
-//       ...formData,
-//       [name]: value,
-//     });
-//   };
-
-//   const handleServiceChange = (e) => {
-//     const { value } = e.target;
-//     setFormData({
-//       ...formData,
-//       service: value,
-//       customService: value.includes("Other") ? formData.customService : "", // Reset customService if "Other" is not selected
-//     });
-//   };
-
-//   const validate = () => {
-//     let newErrors = {};
-//     if (!formData.agentName) newErrors.agentName = "Agent Name is required";
-//     if (!formData.corePurpose) newErrors.corePurpose = "Core Purpose is required";
-//     if (!formData.industry) newErrors.industry = "Industry is required";
-//     if (formData.service.length === 0)
-//       newErrors.service = "At least one Business Service/Product is required";
-//     if (!formData.agentType) newErrors.agentType = "Agent Type is required";
-//     if (!formData.agentLanguage) newErrors.agentLanguage = "Agent Language is required";
-
-//     if (formData.service.includes("Other") && !formData.customService) {
-//       newErrors.customService = "Please specify your service";
-//     }
-
-//     setErrors(newErrors);
-//     return Object.keys(newErrors).length === 0;
-//   };
-
-//   const handleNext = () => {
-//     if (validate()) {
-//       const finalData = {
-//         ...formData,
-//         service: formData.service.map((s) =>
-//           s === "Other" ? formData.customService : s
-//         ), // Replace "Other" with customService in the service array
-//       };
-//       onNext(finalData);
-//     }
-//   };
-
-//   const selectedIndustryData = allBusinessTypes.find(
-//     (i) => i.type === formData.industry
-//   );
-
-//   return (
-//     <Grid container justifyContent="center" sx={{ mt: 3, mb: 5 }} style={{ width: "100%" }}>
-//       <Grid item xs={12} md={8}>
-//         <Paper
-//           elevation={3}
-//           sx={{
-//             p: 4,
-//             borderRadius: 3,
-//             background: "#fafafa",
-//           }}
-//         >
-//           <Typography variant="h5" fontWeight="bold" gutterBottom>
-//             Step 1: Agent General Info
-//           </Typography>
-//           <Divider sx={{ mb: 3 }} />
-
-//           <Stack spacing={3}>
-//             {/* Agent Name */}
-//             <Stack spacing={1}>
-//               <InputLabel>Agent Name</InputLabel>
-//               <TextField
-//                 name="agentName"
-//                 placeholder="E.g., Samsung Customer Service Bot"
-//                 value={formData.agentName}
-//                 onChange={handleChange}
-//                 error={!!errors.agentName}
-//                 helperText={errors.agentName}
-//               />
-//             </Stack>
-
-//             {/* Core Purpose */}
-//             <Stack spacing={1}>
-//               <InputLabel>Core Purpose</InputLabel>
-//               <Select
-//                 name="corePurpose"
-//                 value={formData.corePurpose}
-//                 onChange={handleChange}
-//                 error={!!errors.corePurpose}
-//               >
-//                 {purposes.map((p) => (
-//                   <MenuItem key={p} value={p}>
-//                     {p}
-//                   </MenuItem>
-//                 ))}
-//               </Select>
-//               <FormHelperText error>{errors.corePurpose}</FormHelperText>
-//             </Stack>
-
-//             {/* Industry */}
-//             <Stack spacing={1}>
-//               <InputLabel>Industry</InputLabel>
-//               <Select
-//                 name="industry"
-//                 value={formData.industry}
-//                 onChange={(e) => {
-//                   handleChange(e);
-//                   setFormData({
-//                     ...formData,
-//                     industry: e.target.value,
-//                     service: [], // Reset services when industry changes
-//                     customService: "",
-//                   });
-//                 }}
-//                 error={!!errors.industry}
-//               >
-//                 {allBusinessTypes.map((ind) => (
-//                   <MenuItem key={ind.type} value={ind.type}>
-//                     {ind.type}
-//                   </MenuItem>
-//                 ))}
-//               </Select>
-//               <FormHelperText error>{errors.industry}</FormHelperText>
-
-//               {/* Show icon + subtype */}
-//               {selectedIndustryData && (
-//                 <Stack
-//                   direction="row"
-//                   spacing={1}
-//                   alignItems="center"
-//                   mt={1}
-//                   sx={{
-//                     p: 1,
-//                     borderRadius: 2,
-//                     bgcolor: "#f1f5f9",
-//                   }}
-//                 >
-//                   <img
-//                     src={selectedIndustryData.icon}
-//                     alt=""
-//                     width={28}
-//                     height={28}
-//                   />
-//                   <Typography variant="body2" color="text.secondary">
-//                     {selectedIndustryData.subtype}
-//                   </Typography>
-//                 </Stack>
-//               )}
-//             </Stack>
-
-//             {/* Business Service/Product */}
-//             <Stack spacing={1}>
-//               <InputLabel>Business Services/Products</InputLabel>
-//               <Select
-//                 multiple
-//                 name="service"
-//                 value={formData.service}
-//                 onChange={handleServiceChange}
-//                 error={!!errors.service}
-//                 disabled={!formData.industry}
-//                 renderValue={(selected) => (
-//                   <Stack direction="row" spacing={1} flexWrap="wrap">
-//                     {selected.map((value) => (
-//                       <Chip key={value} label={value} />
-//                     ))}
-//                   </Stack>
-//                 )}
-//               >
-//                 {getServicesByType(formData.industry).map((s) => (
-//                   <MenuItem key={s} value={s}>
-//                     {s}
-//                   </MenuItem>
-//                 ))}
-//               </Select>
-//               <FormHelperText error>{errors.service}</FormHelperText>
-
-//               {/* Custom service if "Other" is selected */}
-//               {formData.service.includes("Other") && (
-//                 <TextField
-//                   fullWidth
-//                   name="customService"
-//                   placeholder="Enter your custom service"
-//                   value={formData.customService}
-//                   onChange={handleChange}
-//                   error={!!errors.customService}
-//                   helperText={errors.customService}
-//                   sx={{ mt: 1 }}
-//                 />
-//               )}
-//             </Stack>
-
-//             {/* Business Name (Optional) */}
-//             <Stack spacing={1}>
-//               <InputLabel>Business Name (Optional)</InputLabel>
-//               <TextField
-//                 name="businessName"
-//                 placeholder="E.g., Samsung, Amazon"
-//                 value={formData.businessName}
-//                 onChange={handleChange}
-//               />
-//             </Stack>
-
-//             {/* Agent Type */}
-//             <Stack spacing={1}>
-//               <InputLabel>Agent Type</InputLabel>
-//               <Select
-//                 name="agentType"
-//                 value={formData.agentType}
-//                 onChange={handleChange}
-//                 error={!!errors.agentType}
-//               >
-//                 {agentTypes.map((t) => (
-//                   <MenuItem key={t} value={t}>
-//                     {t}
-//                   </MenuItem>
-//                 ))}
-//               </Select>
-//               <FormHelperText error>{errors.agentType}</FormHelperText>
-//             </Stack>
-
-//             {/* Agent Language */}
-//             <Stack spacing={1}>
-//               <InputLabel>Agent Language</InputLabel>
-//               <Select
-//                 name="agentLanguage"
-//                 value={formData.agentLanguage}
-//                 onChange={handleChange}
-//                 error={!!errors.agentLanguage}
-//               >
-//                 {languages.map((lang) => (
-//                   <MenuItem key={lang} value={lang}>
-//                     {lang}
-//                   </MenuItem>
-//                 ))}
-//               </Select>
-//               <FormHelperText error>{errors.agentLanguage}</FormHelperText>
-//             </Stack>
-
-//             {/* Next Button */}
-//             <Stack direction="row" justifyContent="flex-end" mt={2}>
-//               <Button
-//                 variant="contained"
-//                 onClick={handleNext}
-//                 sx={{
-//                   px: 4,
-//                   py: 1,
-//                   borderRadius: 2,
-//                   textTransform: "none",
-//                   fontWeight: "bold",
-//                 }}
-//               >
-//                 Proceed to Agent Details →
-//               </Button>
-//             </Stack>
-//           </Stack>
-//         </Paper>
-//       </Grid>
-//     </Grid>
-//   );
-// }
-
-
-
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import avatars from "lib/avatars";
 import {
@@ -450,7 +11,6 @@ import {
   Button,
   Stack,
   Typography,
-  Chip,
   Stepper,
   Step,
   StepLabel,
@@ -459,13 +19,15 @@ import {
 
   IconButton,
 } from "@mui/material";
-import { Paper, Divider } from "@mui/material";
+import ErrorOutline from "@mui/icons-material/ErrorOutline"; //
+import { Paper, Divider, CheckCircle, Chip } from "@mui/material";
 // import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 // import PauseIcon from "@mui/icons-material/Pause";
 import MainCard from "components/MainCard";
 import { GRID_COMMON_SPACING } from "config";
 import axios from "axios";
 import decodeToke from "../../lib/decodeToken"
+import { getAvailableMinutes } from "../../../Services/auth";
 // ---------------- Business Data ----------------
 const allBusinessTypes = [
   {
@@ -817,8 +379,9 @@ function getServicesByType(type) {
   return found ? found.services : [];
 }
 
+
 // ---------------- Main Component ----------------
-export default function AgentGeneralInfo({open, onClose, onSubmit}) {
+export default function AgentGeneralInfo({ open, onClose, onSubmit }) {
   useEffect(() => {
     if (open) {
       setFormData({
@@ -835,6 +398,7 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
         agentLanguageCode: "",
         agentVoice: "",
         customServices: [''],
+        assignMinutes: ""
       });
       setErrors({});
       setActiveStep(0);
@@ -858,10 +422,9 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
     agentLanguageCode: "",
     agentVoice: "",
     customServices: [''],
-    agentAccent: ""
+    agentAccent: "",
+    assignMinutes: ""
   });
-
-
   const [errors, setErrors] = useState({});
   const [activeStep, setActiveStep] = useState(0);
   const [apiStatus, setApiStatus] = useState({ status: null, message: null });
@@ -872,6 +435,8 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
   const [filteredVoices, setFilteredVoices] = useState([]);
   const token = localStorage.getItem("authToken")
   const userDetails = decodeToke(token)
+  const [minute, setMinute] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const purposes = [
     "Customer Support",
@@ -882,7 +447,7 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
   ];
   const agentTypes = ["Inbound", "Outbound", "Both"];
   const genders = ["Male", "Female"];
-  const steps = ["Agent Details", "Business Details", "Agent Configuration"];
+  const steps = ["Agent Details", "Business Details", "Agent Configuration", "Agent Minutes"];
 
   const CustomPlayIcon = () => (
 
@@ -908,8 +473,6 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
       setFilteredVoices(filtered || [])
     }
   }, [formData.agentGender, voices]);
-
-
   // Fetch voices when gender or language changes
   useEffect(() => {
     if (formData.agentGender && formData.agentLanguage) {
@@ -1028,7 +591,6 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
       }
     };
   }, []);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -1064,7 +626,6 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
       });
     }
   };
-
   const handleServiceChange = (event) => {
     const value = event.target.value;
     setFormData({
@@ -1108,11 +669,20 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
       if (!formData.agentLanguage) newErrors.agentLanguage = "Agent Language is required";
       if (!formData.agentVoice) newErrors.agentVoice = "Agent Voice is required";
     }
+    else if (step === 3) {
+      if (!formData.assignMinutes) {
+        newErrors.assignMinutes = "Agent Minutes is required";
+      } else if (minute <= 0) {
+        newErrors.assignMinutes = "You don’t have enough minutes to assign";
+      } else if (formData.assignMinutes > minute) {
+        newErrors.assignMinutes = `You cannot assign more than ${minute.toLocaleString()} minutes`;
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-//AGENT CREATION PROCESS
+  //AGENT CREATION PROCESS
   const handleSubmit = async () => {
     if (validateStep(activeStep)) {
       const finalData = {
@@ -1127,6 +697,7 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
 
       try {
         setApiStatus({ status: null, message: null });
+        setIsSubmitting(true);
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/api/enterpriseAgent/createEnterpriseAgent`, finalData,
           {
@@ -1136,15 +707,20 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
           }
         );
 
- if (response) {
-    setTimeout(() => {
-          handleClose();
-        }, 1500);
-   setApiStatus({ status: "success", message: response?.data?.message });
-          alert(response?.data?.message)
+        if (response) {
+          setTimeout(() => {
+            handleClose();
+          }, 1500);
+          setApiStatus({ status: "success", message: response?.data?.message });
+          getUserMinutes()
+          setTimeout(() => {
+            onClose()
+            setIsSubmitting(false);
+          }, 1000);
+
         }
         console.log(response, "response")
-       
+
         // setApiStatus({ status: "success", message: "Data submitted successfully!" });
         // onNext(finalData);
 
@@ -1153,6 +729,9 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
           status: "error",
           message: error.message || "An error occurred during submission",
         });
+      }
+      finally {
+        //  Re-enable button
       }
     }
   };
@@ -1176,10 +755,6 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
   const selectedIndustryData = allBusinessTypes.find(
     (i) => i.type === formData.industry
   );
-  const handleSelectAccent = (voice) => {
-
-
-  }
   const getStepContent = (step) => {
     switch (step) {
       case 0:
@@ -1425,6 +1000,7 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
             </Stack>
 
             {/* Agent Language */}
+            <InputLabel>Agent Language</InputLabel>
             <Select
               name="agentLanguage"
               value={formData.agentLanguageCode || ""}
@@ -1498,11 +1074,112 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
           </Stack>
 
         );
+      case 3:
+        return (
+
+          <Stack spacing={3}>
+            <fieldset disabled={isSubmitting} style={{ border: "none", padding: 0, margin: 0 }}>
+              {/* Available Bulk Minutes */}
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                p={2}
+                borderRadius={2}
+                bgcolor="action.hover"
+              >
+                <Box>
+                  <Typography variant="subtitle1" fontWeight="600">
+                    Available Minutes
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total minutes in your account
+                  </Typography>
+                </Box>
+                <Chip
+                  label={`${minute?.toLocaleString() || 0} minutes`}
+                  variant="outlined"
+                  sx={{ fontSize: "1rem", px: 2, py: 1 }}
+                />
+              </Box>
+              <br />
+              {/* Assign Minutes Input */}
+              <Stack spacing={1}>
+                <InputLabel>Assign Minutes to Agent *</InputLabel>
+                <TextField
+                  type="number"
+                  name="assignMinutes"
+                  value={formData.assignMinutes || ""}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    setFormData({ ...formData, assignMinutes: value });
+
+                    // ✅ Validation check
+                    if (value > minute) {
+                      setErrors({
+                        ...errors,
+                        assignMinutes: `You cannot assign more than ${minute.toLocaleString()} minutes`,
+                      });
+                    } else {
+                      setErrors({
+                        ...errors,
+                        assignMinutes: "",
+                      });
+                    }
+                  }}
+                  error={!!errors.assignMinutes}
+                  helperText={
+                    errors.assignMinutes
+                  }
+                  fullWidth
+                  placeholder="Enter minutes"
+                  InputProps={{ inputProps: { min: 1, max: minute } }}
+                />
+              </Stack>
+              <br />
+              {/* Minutes Assignment Info */}
+              {formData.assignMinutes > 0 && formData.assignMinutes <= minute && (
+                <div>
+                  <Box p={2} borderRadius={2} bgcolor="primary.main" color="white">
+                    <Box display="flex" alignItems="center" gap={1} mb={1}>
+                      <Typography fontWeight="600">Minutes Assignment</Typography>
+                    </Box>
+                    <Typography variant="body2">
+                      Assigning{" "}
+                      <strong>{formData.assignMinutes.toLocaleString()}</strong> minutes to
+                      this agent.
+                      <br />
+                      Remaining bulk minutes:{" "}
+                      <strong>
+                        {(minute - formData.assignMinutes).toLocaleString()}
+                      </strong>
+                    </Typography>
+                  </Box>
+                </div>
+              )}
+            </fieldset>
+          </Stack>
+
+        );
       default:
         return null;
     }
   };
+  const getUserMinutes = async () => {
+    try {
+      const response = await getAvailableMinutes(userDetails?.user?.id)
+      console.log(response, "responseresponse")
+      if (response) {
+        setMinute(response?.data?.remainingMinutes)
+      }
 
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  useEffect(() => {
+    getUserMinutes()
+  }, [])
   return (
     <Grid justifyContent="center" sx={{ mt: 3, mb: 5 }} style={{ width: "75%" }}>
       <Grid item xs={12} sm={12} md={12} lg={10} >
@@ -1539,7 +1216,6 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
           <Box sx={{ minHeight: { xs: 300, sm: 350, md: 400 } }}>
             {getStepContent(activeStep)}
           </Box>
-
           {/* Navigation Buttons */}
           <Stack
             direction="row"
@@ -1555,7 +1231,10 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
             </Button>
             <Button
               variant="contained"
-              onClick={handleNext}
+              // onClick={handleNext}
+              onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
+              disabled={activeStep === steps.length - 1 && isSubmitting}
+              disabled={isSubmitting || minute <= 0}
               // disabled={}
               sx={{
                 px: 4,
@@ -1565,7 +1244,12 @@ export default function AgentGeneralInfo({open, onClose, onSubmit}) {
                 fontWeight: "bold",
               }}
             >
-              {activeStep === steps.length - 1 ? "Submit" : "Next"}
+              {/* {activeStep === steps.length - 1 ? "Submit" : "Next"} */}
+              {isSubmitting && activeStep === steps.length - 1
+                ? "Submitting..." // show loader text
+                : activeStep === steps.length - 1
+                  ? "Submit"
+                  : "Next"}
             </Button>
           </Stack>
         </Paper>

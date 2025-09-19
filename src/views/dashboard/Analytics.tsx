@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid';
 
 // project-imports
 import { GRID_COMMON_SPACING } from 'config';
+import Typography from '@mui/material/Typography';
 
 import AccountsCard from 'sections/dashboard/finance/Accounts';
 import BalanceCard from 'sections/dashboard/finance/BalanceCard';
@@ -16,6 +17,10 @@ import Transactions from 'sections/dashboard/finance/Transactions';
 import TransactionCard from 'sections/dashboard/finance/TransactionsCard';
 import TransactionHistoryCard from 'sections/dashboard/finance/TransactionHistory';
 import QuickTransferCard from 'sections/dashboard/finance/QuickTransfer';
+import EcommerceDataCard from 'components/cards/statistics/EcommerceDataCard';
+import { ArrowDown, ArrowUp, Book, Calendar, CloudChange, Wallet3 } from '@wandersonalwes/iconsax-react';
+import EcommerceDataChart from 'sections/widget/chart/EcommerceDataChart';
+
 
 // ==============================|| DASHBOARD - FINANCE ||============================== //
 
@@ -25,17 +30,21 @@ export default function DashboardFinance() {
   return (
   // <></>
     <Grid container spacing={GRID_COMMON_SPACING}>
-      {/* <Grid size={{ xs: 12, lg: 4 }}>
+       {/* <Grid size={{ xs: 12, lg: 4 }}>
         <Grid container spacing={GRID_COMMON_SPACING}>
           <Grid size={{ xs: 12, sm: 6, lg: 12 }}>
             <BalanceCard />
           </Grid>
-          {/* <Grid size={{ xs: 12, sm: 6, lg: 12 }}>
+           <Grid size={{ xs: 12, sm: 6, lg: 12 }}>
             <Transactions />
-          </Grid> */}
-        {/* </Grid>
-      </Grid> */} 
-      <Grid size={{ xs: 12, lg: 12 }}>
+          </Grid>
+      </Grid>
+      </Grid>  */}
+
+    
+
+      
+       <Grid size={{ xs: 12, lg: 12 }}>
         <Grid container spacing={GRID_COMMON_SPACING}>
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TransactionCard
@@ -64,14 +73,14 @@ export default function DashboardFinance() {
               amount="5000 Mins"
             />
           </Grid>
-          {/* <Grid size={12}>
+          <Grid size={12}>
             <CashflowChartCard />
-          </Grid> */}
+          </Grid>
           <Grid size={12}>
             <MoneySpentCard />
           </Grid>
         </Grid>
-      </Grid>
+      </Grid> 
       {/* <Grid size={{ xs: 12, lg: 4 }}>
         <AccountsCard />
       </Grid>  */}
@@ -87,3 +96,64 @@ export default function DashboardFinance() {
     </Grid>
   );
 }
+
+
+    // <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+    //     <EcommerceDataCard
+    //       title="All Earnings"
+    //       count="$3000"
+    //       iconPrimary={<Wallet3 />}
+    //       percentage={
+    //         <Typography color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    //           <ArrowUp size={16} style={{ transform: 'rotate(45deg)' }} /> 30.6%
+    //         </Typography>
+    //       }
+    //     >
+    //       <EcommerceDataChart color={theme.palette.primary.main} />
+    //     </EcommerceDataCard>
+    //   </Grid>
+    //   <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+    //     <EcommerceDataCard
+    //       title="Page Views"
+    //       count="290+"
+    //       color="warning"
+    //       iconPrimary={<Book />}
+    //       percentage={
+    //         <Typography sx={{ color: 'warning.dark', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    //           <ArrowDown size={16} style={{ transform: 'rotate(-45deg)' }} /> 30.6%
+    //         </Typography>
+    //       }
+    //     >
+    //       <EcommerceDataChart color={theme.palette.warning.dark} />
+    //     </EcommerceDataCard>
+    //   </Grid>
+    //   <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+    //     <EcommerceDataCard
+    //       title="Total Task"
+    //       count="1,568"
+    //       color="success"
+    //       iconPrimary={<Calendar />}
+    //       percentage={
+    //         <Typography sx={{ color: 'success.darker', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    //           <ArrowUp size={16} style={{ transform: 'rotate(45deg)' }} /> 30.6%
+    //         </Typography>
+    //       }
+    //     >
+    //       <EcommerceDataChart color={theme.palette.success.darker} />
+    //     </EcommerceDataCard>
+    //   </Grid>
+    //   <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+    //     <EcommerceDataCard
+    //       title="Download"
+    //       count="$200"
+    //       color="error"
+    //       iconPrimary={<CloudChange />}
+    //       percentage={
+    //         <Typography sx={{ color: 'error.dark', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    //           <ArrowDown size={16} style={{ transform: 'rotate(45deg)' }} /> 30.6%
+    //         </Typography>
+    //       }
+    //     >
+    //       <EcommerceDataChart color={theme.palette.error.dark} />
+    //     </EcommerceDataCard>
+    //   </Grid>
