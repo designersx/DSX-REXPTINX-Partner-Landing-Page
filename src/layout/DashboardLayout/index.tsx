@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         >
           <Breadcrumbs />
           {children}
-          <Footer />
+          {/* <Footer /> */}
         </Container>
         <Links style={{ textDecoration: 'none' }} href="https://1.envato.market/zNkqj6" target="_blank">
           {/* <Button

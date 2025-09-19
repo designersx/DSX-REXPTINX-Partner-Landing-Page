@@ -31,6 +31,7 @@ export default function KnowledgeBaseUI() {
   const [loading, setLoading] = useState(false);
   const [showAllLinks, setShowAllLinks] = useState(false);
   const userId = getUserId();
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     const fetchKBs = async () => {
@@ -46,10 +47,13 @@ export default function KnowledgeBaseUI() {
             ...kb, // ✅ keep original fields like text, webUrl, scrapedUrls
             name: kb.kbName,
             id: `know...${kb.kbId}`,
-            uploadedAt: new Date(kb.createdAt)
-              .toISOString()
-              .slice(0, 16)
-              .replace("T", " "),
+            uploadedAt:  new Date(kb.createdAt).toLocaleString([], {
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
             details: [
               // scrapedUrls → URLs
               ...(kb.scrapedUrls
@@ -179,12 +183,13 @@ export default function KnowledgeBaseUI() {
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={1}>
-                  <IconButton color="primary" size="small">
+                  <IconButton color="primary" size="small" onClick={() => setOpenDeleteDialog(true)}   // ⬅️ yeh add kar
+>
                     <DeleteIcon />
                   </IconButton>
-                  <IconButton color="secondary" size="small">
+                  {/* <IconButton color="secondary" size="small">
                     <DownloadIcon />
-                  </IconButton>
+                  </IconButton> */}
                 </Stack>
               </Stack>
 
@@ -232,7 +237,7 @@ export default function KnowledgeBaseUI() {
               )}
 
               {/* ✅ All Scraped Links */}
-              {showAllLinks &&
+              {/* {showAllLinks &&
                 selectedItem.scrapedUrls &&
                 JSON.parse(selectedItem.scrapedUrls).map((url: string, idx: number) => (
                   <Paper
@@ -262,35 +267,10 @@ export default function KnowledgeBaseUI() {
                       {url}
                     </Typography>
                   </Paper>
-                ))}
+                ))} */}
 
-              {/* ✅ Download text file */}
-              {selectedItem.text && (
-                <Paper
-                  sx={{
-                    p: 2,
-                    mt: 2,
-                    borderRadius: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <InsertDriveFileIcon color="error" />
-                    <Typography fontWeight={500}>Text File</Typography>
-                  </Stack>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={() => handleDownloadText(selectedItem)}
-                  >
-                    Download
-                  </Button>
-                </Paper>
-              )}
-
-              {/* ✅ Old details list (files, etc.) */}
+                {/* ✅ Old details list (files, etc.) */}
+              {showAllLinks &&
               <Stack spacing={2} mt={2}>
                 {selectedItem.details.map((d: any, i: number) => (
                   <Paper
@@ -359,6 +339,35 @@ export default function KnowledgeBaseUI() {
                   </Paper>
                 ))}
               </Stack>
+              }
+
+              {/* ✅ Download text file */}
+              {selectedItem.text && (
+                <Paper
+                  sx={{
+                    p: 2,
+                    mt: 2,
+                    borderRadius: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <InsertDriveFileIcon color="error" />
+                    <Typography fontWeight={500}>Text File</Typography>
+                  </Stack>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => handleDownloadText(selectedItem)}
+                  >
+                    Download
+                  </Button>
+                </Paper>
+              )}
+
+            
             </Paper>
           ) : (
             <Paper
@@ -383,3 +392,4 @@ export default function KnowledgeBaseUI() {
     </>
   );
 }
+

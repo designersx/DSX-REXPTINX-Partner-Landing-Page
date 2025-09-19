@@ -93,6 +93,7 @@ export default function ProfilePage() {
       default:
         signOut({ redirect: false });
     }
+    localStorage.removeItem('authToken');
 
     router.push('/login');
   };
