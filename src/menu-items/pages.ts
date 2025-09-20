@@ -3,10 +3,10 @@ import { Book1, I24Support, Security, MessageProgramming, DollarSquare, Airplane
 
 // types
 import { NavItemType } from 'types/menu';
-
+import DashboardIcon from '@mui/icons-material/Dashboard';
 // icons
 const icons = {
-  page: Book1,
+  page: DashboardIcon,
   authentication: Security,
   maintenance: MessageProgramming,
   pricing: DollarSquare,
