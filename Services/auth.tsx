@@ -92,7 +92,7 @@ export async function getAvailableMinutes(userId) {
  export const getAgentCallById = async (agentId, callId, start_timestamp) => {
           try {
             // const res = await api.get(`/agent/user/${userId}/agent/calls`, {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/callHistory/getSpecificCallData/call/${agentId}/${callId}?start_timestamp=${start_timestamp}`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/callHistory/getSpecificCallData/call/${agentId}/${callId}?start_timestamp=${start_timestamp}`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('authToken')}`,
               },

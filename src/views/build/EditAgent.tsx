@@ -30,6 +30,7 @@ export default function TransactionHistoryCard({ agentId }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [calldata, setCallData] = useState([]);
+  const [Transcription, setTranscription] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("token");
@@ -69,6 +70,7 @@ export default function TransactionHistoryCard({ agentId }) {
     //  const  callId=callId
      const res = await getAgentCallById(agentId, callId, start_timestamp)
      console.log(res,"res")
+     setTranscription(res?.call?.transcript_object ||[])
   }
   return (
     <>
@@ -144,7 +146,7 @@ export default function TransactionHistoryCard({ agentId }) {
       </MainCard>
 
       {/* Chat Modal for Transcription */}
-      <ChatModal open={open} onClose={() => setOpen(false)} transcription={sampleTranscription} />
+      <ChatModal open={open} onClose={() => setOpen(false)} transcription={Transcription} />
     </>
   );
 }
