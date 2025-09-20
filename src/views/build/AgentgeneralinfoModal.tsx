@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogTitle, 
-  Slide, 
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Slide,
   Button,
   Typography,
-  Box 
+  Box
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import AgentGeneralInfo from './CreateAgent';
@@ -21,25 +21,28 @@ const Transition = React.forwardRef(function Transition(
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
 export default function AgentGeneralInfoModal({ open, onClose, onSubmit }) {
   return (
-  <Dialog
-  open={open}
-  onClose={onClose}
-  fullWidth
-  TransitionComponent={Transition}
-  PaperProps={{
-    sx: {
-      height: '80vh',
-      borderRadius: 3,
-      overflow: 'hidden',
-      maxWidth: '800px',  
-      width: '100%',       
-    },
-  }}
->
-      <DialogContent sx={{ p: 4, width:'130%',height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Dialog
+      open={open}
+      onClose={(event, reason) => {
+        if (reason === 'backdropClick' || reason === 'escapeKeyDown') return;
+        onClose(event, reason);
+      }}
+      fullWidth
+      disableEscapeKeyDown
+      TransitionComponent={Transition}
+      PaperProps={{
+        sx: {
+          height: '100vh',
+          borderRadius: 3,
+          overflow: 'hidden',
+          maxWidth: '900px',
+          width: '100%',
+        },
+      }}
+    >
+      <DialogContent sx={{ p: 4, width: '130%', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <AgentGeneralInfo
           open={open}
           onClose={onClose}
