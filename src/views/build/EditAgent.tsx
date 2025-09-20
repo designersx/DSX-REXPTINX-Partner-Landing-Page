@@ -19,6 +19,9 @@ import { Eye } from '@wandersonalwes/iconsax-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { getAgentCallById } from '../../../Services/auth';
+// import { TablePaginationActions } from '@mui/material';
+import { TablePagination } from '@mui/material';
+
 // Sample Transcription (use actual transcription data)
 const sampleTranscription = [
   { id: 1, sender: 'Agent', message: 'Hello! How can I help you today?', timestamp: '2025-09-19 10:00 AM' },
@@ -33,6 +36,8 @@ export default function TransactionHistoryCard({ agentId }) {
   const [Transcription, setTranscription] = useState([]);
   const [currentAudio, setCurrentAudio] = useState(null);
 const [playingCallId, setPlayingCallId] = useState(null);
+const [page, setPage] = useState(0);
+const [rowsPerPage, setRowsPerPage] = useState(50);
  const [agent, setAgent] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
@@ -114,11 +119,11 @@ const [playingCallId, setPlayingCallId] = useState(null);
 useEffect(() => {
   const fetchAgent = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/getAgent/${agentId}}`, { 
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/getAgent/${agentId}`, { 
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Adjust token storage as needed
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Adjust token storage as needed
         }
       });
 
@@ -137,6 +142,28 @@ useEffect(() => {
   fetchAgent();
 }, [agentId]);
 
+const getColor = (sentiment?: string) => {
+  if (!sentiment) return "default";
+
+  switch (sentiment.toLowerCase()) {
+    case "positive":
+      return "success"; // green
+    case "negative":
+      return "error"; // red
+    case "neutral":
+      return "warning"; // yellow/orange
+    default:
+      return "default"; // grey
+  }
+};
+const handleChangePage = (event, newPage) => {
+  setPage(newPage);
+};
+
+const handleChangeRowsPerPage = (event) => {
+  setRowsPerPage(parseInt(event.target.value, 10));
+  setPage(0);
+};
 
   return (
     <>
@@ -159,12 +186,14 @@ useEffect(() => {
             </TableHead>
             <TableBody>
               {calldata?.length > 0 ?
-                calldata?.map((row, index) => (
+                calldata
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, index) => (
                   <TableRow hover key={index}>
                     <TableCell>
                       <Stack>
                         <Typography>{new Date(row.start_timestamp).toLocaleString()}</Typography>
-                         <Typography>{new Date(row.end_timestamp).toLocaleString()}</Typography>
+                         {/* <Typography>{new Date(row.end_timestamp).toLocaleString()}</Typography> */}
                       </Stack>
                     </TableCell>
                     <TableCell align="center">
@@ -187,7 +216,14 @@ useEffect(() => {
                       <Chip size="small" color="info" label={row?.custom_analysis_data?.lead_type || 'N/A'} />
                     </TableCell>
                       <TableCell align="center">
-                      <Typography>{row?.user_sentiment}</Typography>
+                      <Typography>
+                           {/* <Chip size="small" color={getColor(row?.user_sentiment)} label={row?.user_sentiment}/> */}
+                           <Chip
+                            size="small"
+                            color={getColor(row?.user_sentiment)}
+                            label={row?.user_sentiment || "N/A"}
+                          />
+                        </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Chip size="small" color="primary" label={row?.call_type || 'N/A'} />
@@ -250,6 +286,15 @@ useEffect(() => {
             </TableBody>
           </Table>
         </TableContainer>
+               <TablePagination
+                  component="div"
+                  count={calldata.length}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  rowsPerPage={rowsPerPage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  rowsPerPageOptions={[5, 10, 25, 50]}
+                />
       </MainCard>
 
       {/* Chat Modal for Transcription */}
