@@ -109,7 +109,7 @@ const [playingCallId, setPlayingCallId] = useState(null);
     setPlayingCallId(null);
   };
 };
-console.log(calldata[0]?.duration_ms)
+// console.log(calldata[0]?.duration_ms)
 
   return (
     <>
@@ -118,11 +118,14 @@ console.log(calldata[0]?.duration_ms)
           <Table sx={{ minWidth: 560 }}>
             <TableHead>
               <TableRow>
-                <TableCell>Call Id</TableCell>
+                 <TableCell>Date/Time</TableCell>
+                 <TableCell align="center">Call duration</TableCell>
+               
                 <TableCell>Reason</TableCell>
-                <TableCell>Date/Time</TableCell>
-                <TableCell align="center">Call duration</TableCell>
+               
+                
                 <TableCell align="center">Lead Type</TableCell>
+                 <TableCell>Sentiment</TableCell>
                 <TableCell align="center">Call Type</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
@@ -131,12 +134,6 @@ console.log(calldata[0]?.duration_ms)
               {calldata?.length > 0 ?
                 calldata?.map((row, index) => (
                   <TableRow hover key={index}>
-                    <TableCell align="center">
-                      <Typography>{row?.call_id}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography>{row?.custom_analysis_data?.reason || 'No reason'}</Typography>
-                    </TableCell>
                     <TableCell>
                       <Stack>
                         <Typography>{new Date(row.start_timestamp).toLocaleString()}</Typography>
@@ -146,8 +143,24 @@ console.log(calldata[0]?.duration_ms)
                     <TableCell align="center">
                       <Typography>{formatDuration(row?.duration_ms)} min</Typography>
                     </TableCell>
+                  
+                    <TableCell>
+                   <Tooltip title={row?.custom_analysis_data?.reason || 'No reason'}>
+  <Typography>
+    {(row?.custom_analysis_data?.reason || 'No reason').length > 40
+      ? `${row.custom_analysis_data.reason.slice(0, 40)}...`
+      : row.custom_analysis_data.reason || 'No reason'}
+  </Typography>
+</Tooltip>
+
+                    </TableCell>
+                    
+                    
                     <TableCell align="center">
                       <Chip size="small" color="info" label={row?.custom_analysis_data?.lead_type || 'N/A'} />
+                    </TableCell>
+                      <TableCell align="center">
+                      <Typography>{row?.user_sentiment}</Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Chip size="small" color="primary" label={row?.call_type || 'N/A'} />
