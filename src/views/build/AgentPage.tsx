@@ -444,7 +444,7 @@ export default function TransactionHistoryCard() {
                         <Tooltip title="View call history">
                           <IconButton
                             color="secondary"
-                            onClick={() => router.push(`/build/agents/calldetails/${row?.agent_id}`)}
+                            onClick={() => router.push(`/build/agents/agentdetails/${row?.agent_id}`)}
                           >
                             <Eye />
                           </IconButton>
