@@ -9,7 +9,7 @@
   "private": true,
   "scripts": {
 
-    "dev": "next dev -p 4008",
+    "dev": "next dev -p 4007",
 
     "build": "next build",
     "start": "next start",
