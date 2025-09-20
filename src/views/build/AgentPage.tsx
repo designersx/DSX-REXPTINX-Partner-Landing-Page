@@ -411,12 +411,12 @@ export default function TransactionHistoryCard() {
 
                   {/* Mins Assigned */}
                   <TableCell align="center">
-                    <Typography>{row.planMinutes}</Typography>
+                  <Typography>{Math.floor(row.planMinutes / 60)}</Typography>
                   </TableCell>
 
                   {/* Mins Remaining */}
                   <TableCell align="center">
-                    <Typography>{row.mins_left}</Typography>
+                  <Typography>{Math.floor(row.mins_left / 60)}</Typography>
                   </TableCell>
 
                   {/* Status */}
@@ -433,7 +433,7 @@ export default function TransactionHistoryCard() {
                       <Tooltip title="View call history">
                         <IconButton
                           color="secondary"
-                          onClick={() => router.push(`/build/agents/calldetails/${row?.agent_id}`)}
+                          onClick={() => router.push(`/build/agents/agentdetails/${row?.agent_id}`)}
                         >
                           <Eye />
                         </IconButton>

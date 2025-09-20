@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from 'components/@extended/IconButton';
 import MoreIcon from 'components/@extended/MoreIcon';
 import MainCard from 'components/MainCard';
+import { useRouter } from 'next/navigation';
 
 // assets
 import { Add } from '@wandersonalwes/iconsax-react';
@@ -111,6 +112,8 @@ function SpentCard({ name, img, percentage, money,assignedMinutes }: cardProps) 
 
 
 export default function AgentDetailCard({ agents }: { agents: Agent[] }) {
+const router = useRouter();
+  
   return (
     <MainCard>
       <Stack sx={{ gap: 2.5 }}>
@@ -132,6 +135,10 @@ export default function AgentDetailCard({ agents }: { agents: Agent[] }) {
 
             return (
                 <Grid key={agent.agent_id} size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <div
+                  onClick={() =>router.push(`/build/agents/agentdetails/${agent.agent_id}`)}
+                  className="cursor-pointer"
+                >
                 <SpentCard
                     img={agent.avatar}
                     name={agent.agentName}
@@ -139,6 +146,7 @@ export default function AgentDetailCard({ agents }: { agents: Agent[] }) {
                     money={minsLeft} // minutes me bhej diya
                     assignedMinutes={planMinutes}
                 />
+                </div>
                 </Grid>
             );
             })}
