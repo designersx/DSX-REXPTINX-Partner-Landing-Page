@@ -6,23 +6,23 @@ console.log(process.env.NEXT_PUBLIC_API_URL)
 // admin login api
 
 export const Login = async (email, password) => {
-    try {
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/enterprise/EnterprisePartnerLogin`, { email, password });
-        console.log(res)
-        return res.data;
-    } catch (error) {
-      console.log(error)
-         return error.response.data;
-        if (error.response?.data?.msg) {
-            throw new Error(error.response.data.msg);
-        }
-      
+  try {
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/enterprise/EnterprisePartnerLogin`, { email, password });
+    console.log(res)
+    return res.data;
+  } catch (error) {
+    console.log(error)
+    return error.response.data;
+    if (error.response?.data?.msg) {
+      throw new Error(error.response.data.msg);
     }
+
+  }
 };
 
-export const fetchAgent=async()=> {
+export const fetchAgent = async () => {
   try {
-    const userId=getUserId()
+    const userId = getUserId()
     const res = await axios.get(
 
       `${process.env.NEXT_PUBLIC_API_URL}/api/agent/getKnowledgeBaseBasedUser/${userId}`
@@ -68,7 +68,7 @@ export const validateWebsite = async (websiteUrl) => {
 };
 export const AddKB = async (formData) => {
   try {
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/enterprise/AddEnterpriseKnowledgeBase`, formData,{
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/enterprise/AddEnterpriseKnowledgeBase`, formData, {
       headers: { "Content-Type": "multipart/form-data" }
     });
     return res.data;
@@ -81,7 +81,7 @@ export async function getAvailableMinutes(userId) {
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/api/enterpriseAgent/getAvailableMinutes/${userId}`,
-   
+
     );
     return response.data;
   } catch (error) {
@@ -89,17 +89,17 @@ export async function getAvailableMinutes(userId) {
     throw error;
   }
 }
- export const getAgentCallById = async (agentId, callId, start_timestamp) => {
-          try {
-            // const res = await api.get(`/agent/user/${userId}/agent/calls`, {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/callHistory/getSpecificCallData/call/${agentId}/${callId}?start_timestamp=${start_timestamp}`, {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-              },
-            });
-            return res.data;
-          } catch (error) {
-            console.error("Error fetching agent calls:", error.response?.data || error.message);
-            throw new Error("Failed to fetch agent calls");
-          }
-        };
+export const getAgentCallById = async (agentId, callId, start_timestamp) => {
+  try {
+    // const res = await api.get(`/agent/user/${userId}/agent/calls`, {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/callHistory/getSpecificCallData/call/${agentId}/${callId}?start_timestamp=${start_timestamp}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching agent calls:", error.response?.data || error.message);
+    throw new Error("Failed to fetch agent calls");
+  }
+};

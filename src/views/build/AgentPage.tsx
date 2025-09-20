@@ -30,6 +30,9 @@ import { RetellWebClient } from "retell-client-js-sdk";
 
 import { useRouter } from 'next/navigation';
 import { fetchAgent } from '../../../Services/auth';
+import { TablePagination } from '@mui/material';
+import Loader from 'components/Loader';
+import Search from 'layout/DashboardLayout/Header/HeaderContent/Search';
 const Avatar1 = '/assets/images/avatrs/Female-01.png';
 const Avatar2 = '/assets/images/avatrs/male-01.png';
 const Avatar3 = '/assets/images/avatrs/Female-02.png';
@@ -66,23 +69,21 @@ const rows = [
 ];
 
 export default function TransactionHistoryCard() {
-
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [loading, setLoading] = useState(false)
-
   const [agents, setAgents] = useState<any[]>([]); // store API data
-
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<any>(null);
-
   const [isCallActive, setIsCallActive] = useState(false);
   const [callLoading, setCallLoading] = useState(false);
   const isEndingRef = useRef(false);
   const [isCallInProgress, setIsCallInProgress] = useState(false);
   const [callId, setCallId] = useState("");
   const [retellWebClient, setRetellWebClient] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState("");
   // const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -97,16 +98,12 @@ export default function TransactionHistoryCard() {
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
-
-  console.log('selectedAgent', selectedAgent)
   useEffect(() => {
     const loadAgents = async () => {
       try {
         const res = await fetchAgent(); // ✅ call your API function
-        console.log("API response:", res);
-
-        // Assuming res is an array of agents
-        setAgents(res?.agents || []);
+        let agentsData = res?.agents || [];
+        setAgents(agentsData);
       } catch (err) {
         console.error("Error fetching agents:", err);
       } finally {
@@ -116,42 +113,36 @@ export default function TransactionHistoryCard() {
 
     loadAgents();
   }, []);
-
-
-
   const handleCreateAgentClick = () => {
-    console.log('ddsds', isModalOpen);
     setIsModalOpen(true);
+
   };
 
-  const handleAgentSubmit = (agentData) => {
-    console.log('Agent created:', agentData);
+  const handleAgentSubmit = async (agentData) => {
+    await loadAgents();
     // Handle successful agent creation - you might want to refresh your agents list here
     setIsModalOpen(false);
     // Optionally refresh the table data or show a success message
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = (event, reason) => {
+    if (reason === 'backdropClick') {
+      return;
+    }
     setIsModalOpen(false);
   };
-  useEffect(() => {
-    const loadAgents = async () => {
-      try {
-        const res = await fetchAgent(); // ✅ call your API function
-        console.log("API response:", res);
-
-        // Assuming res is an array of agents
-        setAgents(res?.agents || []);
-      } catch (err) {
-        console.error("Error fetching agents:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAgents();
-  }, []);
-
+  const loadAgents = async () => {
+    try {
+      setLoading(true)
+      const res = await fetchAgent(); // ✅ call your API function
+      // Assuming res is an array of agents
+      setAgents(res?.agents || []);
+    } catch (err) {
+      console.error("Error fetching agents:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOpenDialog = (agent: any) => {
     setSelectedAgent(agent);
@@ -176,25 +167,6 @@ export default function TransactionHistoryCard() {
     }
   };
 
-  useEffect(() => {
-    const client = new RetellWebClient();
-    client.on("call_started", () => setIsCallActive(true));
-    client.on("call_ended", () => setIsCallActive(false));
-    client.on("update", (update) => {
-      //  Mark the update clearly as AGENT message
-      const customUpdate = {
-        ...update,
-        source: "agent", // Add explicit source
-      };
-
-      // Dispatch custom event for CallTest
-      window.dispatchEvent(
-        new CustomEvent("retellUpdate", { detail: customUpdate })
-      );
-    });
-
-    setRetellWebClient(client);
-  }, []);
 
   const handleStartCall = async () => {
     setCallLoading(true);
@@ -233,7 +205,7 @@ export default function TransactionHistoryCard() {
     setCallLoading(true);
     try {
       const agentId = selectedAgent?.agent_id;
-   
+
       if (!agentId) throw new Error("No agent ID found");
 
       // Example: Initiate a call with Retell AI
@@ -327,10 +299,37 @@ export default function TransactionHistoryCard() {
       setSelectedAgent(null);
     }, 1000); // Simulate call ending delay
   };
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
 
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // reset to first page
+  };
+  //LOCK
+  useEffect(() => {
+    const client = new RetellWebClient();
+    client.on("call_started", () => setIsCallActive(true));
+    client.on("call_ended", () => setIsCallActive(false));
+    client.on("update", (update) => {
+      //  Mark the update clearly as AGENT message
+      const customUpdate = {
+        ...update,
+        source: "agent", // Add explicit source
+      };
 
+      // Dispatch custom event for CallTest
+      window.dispatchEvent(
+        new CustomEvent("retellUpdate", { detail: customUpdate })
+      );
+    });
 
-
+    setRetellWebClient(client);
+  }, []);
+  useEffect(() => {
+    loadAgents();
+  }, []);
   return (
     <>
       <MainCard
@@ -355,100 +354,112 @@ export default function TransactionHistoryCard() {
           </Button>
         }
       >
+        {/* <Search value={searchTerm} onChange={setSearchTerm} /> */}
         <TableContainer>
           <Table sx={{ minWidth: 560 }}>
             <TableHead>
               <TableRow>
-                <TableCell>Image</TableCell>
+                <TableCell>Avatar</TableCell>
                 <TableCell>Agent Name</TableCell>
                 <TableCell>Business Name</TableCell>
                 <TableCell>Business Category</TableCell>
                 <TableCell>Date/Time</TableCell>
                 <TableCell align="center">Mins Assigned</TableCell>
                 <TableCell align="center">Mins Remaining</TableCell>
-                <TableCell align="center">Status</TableCell>
+                {/* <TableCell align="center">Status</TableCell> */}
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {agents.map((row, index) => (
-                <TableRow hover key={index}>
-                  {/* Image */}
-                  <TableCell align="center">
-                    <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
-                      <Avatar
-                        alt={row.agentName}
-                        src={row.avatar?.startsWith("/") ? row.avatar : `/${row.avatar}`}
-                      />
-
-                    </Stack>
+              {loading ? (
+                <Loader />
+              ) : agents.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">
+                    <Typography>No agents found.</Typography>
                   </TableCell>
-
-                  {/* Agent Name */}
-                  <TableCell align="center">
-                    <Typography>{row.agentName}</Typography>
-                  </TableCell>
-
-                  {/* Business Name */}
-                  <TableCell>
-                    <Typography>{row?.businessDetails?.name}</Typography>
-                  </TableCell>
-
-                  {/* Business Category */}
-                  <TableCell>
-                    <Typography>{row.position}</Typography>
-                  </TableCell>
-
-                  {/* Date/Time */}
-                  <TableCell>
-                    <Stack>
-                      <Typography>{row.createdAt}</Typography>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                        {row.createdAt}
-                      </Typography>
-                    </Stack>
-                  </TableCell>
-
-                  {/* Mins Assigned */}
-                  <TableCell align="center">
-                    <Typography>{row.planMinutes}</Typography>
-                  </TableCell>
-
-                  {/* Mins Remaining */}
-                  <TableCell align="center">
-                    <Typography>{row.mins_left}</Typography>
-                  </TableCell>
-
-                  {/* Status */}
-                  <TableCell align="center">
-                    <Chip size="small" color="grey" label={row?.agentAccent} />
-                  </TableCell>
-
-                  {/* Action */}
-                  <TableCell align="center">
-                    <Stack
-                      direction="row"
-                      sx={{ alignItems: "center", justifyContent: "center", gap: 1 }}
-                    >
-                      <Tooltip title="View call history">
-                        <IconButton
-                          color="secondary"
-                          onClick={() => router.push(`/build/agents/calldetails/${row?.agent_id}`)}
-                        >
-                          <Eye />
-                        </IconButton>
-                      </Tooltip>
-
-                      <Tooltip title="Test Call">
-                        <Chip
-                          size="small"
-                          color={getValidColor("primary")}
-                          label="Test Call"
-                          onClick={() => handleOpenDialog(row)}
+                </TableRow>
+              ) : agents.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, index) => (
+                  <TableRow hover key={index}>
+                    {/* Image */}
+                    <TableCell align="center">
+                      <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
+                        <Avatar
+                          alt={row.agentName}
+                          src={row.avatar?.startsWith("/") ? row.avatar : `/${row.avatar}`}
                         />
-                      </Tooltip>
 
-                      {/* <Tooltip title="View">
+                      </Stack>
+                    </TableCell>
+
+                    {/* Agent Name */}
+                    <TableCell align="center">
+                      <Typography>{row.agentName}</Typography>
+                    </TableCell>
+
+                    {/* Business Name */}
+                    <TableCell>
+                      <Typography>{row?.businessDetails?.name}</Typography>
+                    </TableCell>
+
+                    {/* Business Category */}
+                    <TableCell>
+                      <Typography>{row?.businessDetails?.BusinessType}</Typography>
+                    </TableCell>
+
+                    {/* Date/Time */}
+                    <TableCell>
+                      <Stack>
+                        <Typography> {new Date(row.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}</Typography>
+
+                      </Stack>
+                    </TableCell>
+                    {/* Mins Assigned */}
+                    <TableCell align="center">
+                      <Typography>{row.planMinutes}</Typography>
+                    </TableCell>
+
+                    {/* Mins Remaining */}
+                    <TableCell align="center">
+                      <Typography>{row.mins_left}</Typography>
+                    </TableCell>
+
+                    {/* Status */}
+                    {/* <TableCell align="center">
+                    <Chip size="small" color="grey" label={row?.agentAccent} />
+                  </TableCell> */}
+
+                    {/* Action */}
+                    <TableCell align="center">
+                      <Stack
+                        direction="row"
+                        sx={{ alignItems: "center", justifyContent: "center", gap: 1 }}
+                      >
+                        <Tooltip title="View call history">
+                          <IconButton
+                            color="secondary"
+                            onClick={() => router.push(`/build/agents/calldetails/${row?.agent_id}`)}
+                          >
+                            <Eye />
+                          </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Test Agent">
+                          <Chip
+                            size="small"
+                            color={getValidColor("primary")}
+                            label="Test Call"
+                            onClick={() => handleOpenDialog(row)}
+                          />
+                        </Tooltip>
+
+                        {/* <Tooltip title="View">
                       <IconButton
                         color="secondary"
                         onClick={() => router.push("/build/agents/editagent")}
@@ -457,7 +468,7 @@ export default function TransactionHistoryCard() {
                       </IconButton>
                     </Tooltip> */}
 
-                      {/* <Tooltip title="Edit">
+                        {/* <Tooltip title="Edit">
                       <IconButton color="primary">
                         <Edit />
                       </IconButton>
@@ -468,13 +479,22 @@ export default function TransactionHistoryCard() {
                         <Trash />
                       </IconButton>
                     </Tooltip> */}
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={agents.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 10, 25, 50]}
+        />
       </MainCard>
 
       {/* Call Dialog */}
@@ -497,7 +517,6 @@ export default function TransactionHistoryCard() {
         onClose={handleModalClose}
         onSubmit={handleAgentSubmit}
       />
-
       {/* Snackbar */}
       <Snackbar
         open={snackbar.open}

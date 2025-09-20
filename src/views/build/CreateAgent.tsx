@@ -25,6 +25,8 @@ import { Paper, Divider, CheckCircle, Chip } from "@mui/material";
 // import PauseIcon from "@mui/icons-material/Pause";
 import MainCard from "components/MainCard";
 import { GRID_COMMON_SPACING } from "config";
+
+import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import decodeToke from "../../lib/decodeToken"
 import { getAvailableMinutes } from "../../../Services/auth";
@@ -654,7 +656,7 @@ export default function AgentGeneralInfo({ open, onClose, onSubmit }) {
     let newErrors = {};
     if (step === 0) {
       if (!formData.agentName) newErrors.agentName = "Agent Name is required";
-      if (!formData.corePurpose) newErrors.corePurpose = "Core Purpose is required";
+      // if (!formData.corePurpose) newErrors.corePurpose = "Core Purpose is required";
       if (!formData.agentGender) newErrors.agentGender = "Agent Gender is required";
       if (!formData.agentAvatar) newErrors.agentAvatar = "Please select an avatar";
     } else if (step === 1) {
@@ -716,14 +718,13 @@ export default function AgentGeneralInfo({ open, onClose, onSubmit }) {
           setTimeout(() => {
             onClose()
             setIsSubmitting(false);
+            onSubmit()
           }, 1000);
 
         }
         console.log(response, "response")
-
         // setApiStatus({ status: "success", message: "Data submitted successfully!" });
         // onNext(finalData);
-
       } catch (error) {
         setApiStatus({
           status: "error",
@@ -775,7 +776,7 @@ export default function AgentGeneralInfo({ open, onClose, onSubmit }) {
             </Stack>
 
             {/* Core Purpose */}
-            <Stack spacing={1}>
+            {/* <Stack spacing={1}>
               <InputLabel>Core Purpose</InputLabel>
               <Select
                 name="corePurpose"
@@ -791,7 +792,7 @@ export default function AgentGeneralInfo({ open, onClose, onSubmit }) {
                 ))}
               </Select>
               <FormHelperText error>{errors.corePurpose}</FormHelperText>
-            </Stack>
+            </Stack> */}
 
             {/* Agent Gender */}
             <Stack spacing={1}>
@@ -1177,6 +1178,9 @@ export default function AgentGeneralInfo({ open, onClose, onSubmit }) {
       console.log(error)
     }
   }
+  const handleClose = () => {
+    onClose()
+  }
   useEffect(() => {
     getUserMinutes()
   }, [])
@@ -1191,6 +1195,18 @@ export default function AgentGeneralInfo({ open, onClose, onSubmit }) {
             background: "#fafafa",
           }}
         >
+          <IconButton
+            aria-label="close"
+            onClick={handleClose} // 👈 aapko ye function define karna hoga
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              color: (theme) => theme.palette.grey[600],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
           <Typography variant="h5" fontWeight="bold" gutterBottom>
             Agent General Info
           </Typography>
