@@ -33,6 +33,7 @@ export default function TransactionHistoryCard({ agentId }) {
   const [Transcription, setTranscription] = useState([]);
   const [currentAudio, setCurrentAudio] = useState(null);
 const [playingCallId, setPlayingCallId] = useState(null);
+ const [agent, setAgent] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("token");
@@ -110,6 +111,32 @@ const [playingCallId, setPlayingCallId] = useState(null);
   };
 };
 // console.log(calldata[0]?.duration_ms)
+useEffect(() => {
+  const fetchAgent = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/getAgent/${agentId}}`, { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Adjust token storage as needed
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch agent');
+      }
+
+      const data = await res.json(); 
+      console.log(data, "data"); // Fixed this line
+      setAgent(data);
+    } catch (err) {
+      console.log(err.message); 
+    } 
+  };
+
+  fetchAgent();
+}, [agentId]);
+
 
   return (
     <>
