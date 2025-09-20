@@ -31,6 +31,9 @@ export default function TransactionHistoryCard({ agentId }) {
   const [open, setOpen] = useState(false);
   const [calldata, setCallData] = useState([]);
   const [Transcription, setTranscription] = useState([]);
+  const [currentAudio, setCurrentAudio] = useState(null);
+const [playingCallId, setPlayingCallId] = useState(null);
+ const [agent, setAgent] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("token");
@@ -55,11 +58,18 @@ export default function TransactionHistoryCard({ agentId }) {
     fetchData();
   }, [agentId]);
   // Convert milliseconds to minutes
-  const formatDuration = (duration_ms) => {
-    const seconds = Math.floor(duration_ms / 1000); // Convert to seconds
-    const minutes = Math.floor(seconds / 60); // Convert to minutes
-    return minutes;
-  };
+ const formatDuration = (duration_ms) => {
+  const totalSeconds = Math.floor(duration_ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  // Pad single digit seconds with a 0 (e.g., 1:05 instead of 1:5)
+  const formatted = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  return formatted;
+};
+
+   
+  
   const handleViewCallHistory = async (call) => {
     setOpen(true)
     // console.log(call, "HELLO")
@@ -72,6 +82,62 @@ export default function TransactionHistoryCard({ agentId }) {
      console.log(res,"res")
      setTranscription(res?.call?.transcript_object ||[])
   }
+
+ const handlePlayPauseRecording = (url, callId) => {
+  if (!url) return;
+
+  // If the same audio is already playing, toggle pause/play
+  if (playingCallId === callId) {
+    currentAudio.pause();
+    setPlayingCallId(null);
+    return;
+  }
+
+  // Stop previous audio if playing
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+
+  const audio = new Audio(url);
+  audio.play().catch((err) => console.error("Playback failed", err));
+
+  setCurrentAudio(audio);
+  setPlayingCallId(callId);
+
+  // When audio ends
+  audio.onended = () => {
+    setPlayingCallId(null);
+  };
+};
+// console.log(calldata[0]?.duration_ms)
+useEffect(() => {
+  const fetchAgent = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/getAgent/${agentId}}`, { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Adjust token storage as needed
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch agent');
+      }
+
+      const data = await res.json(); 
+      console.log(data, "data"); // Fixed this line
+      setAgent(data);
+    } catch (err) {
+      console.log(err.message); 
+    } 
+  };
+
+  fetchAgent();
+}, [agentId]);
+
+
   return (
     <>
       <MainCard title={<Typography variant="h5">Call Details</Typography>} content={false}>
@@ -79,11 +145,14 @@ export default function TransactionHistoryCard({ agentId }) {
           <Table sx={{ minWidth: 560 }}>
             <TableHead>
               <TableRow>
-                <TableCell>Call Id</TableCell>
+                 <TableCell>Date/Time</TableCell>
+                 <TableCell align="center">Call duration</TableCell>
+               
                 <TableCell>Reason</TableCell>
-                <TableCell>Date/Time</TableCell>
-                <TableCell align="center">Call duration</TableCell>
+               
+                
                 <TableCell align="center">Lead Type</TableCell>
+                 <TableCell>Sentiment</TableCell>
                 <TableCell align="center">Call Type</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
@@ -92,25 +161,33 @@ export default function TransactionHistoryCard({ agentId }) {
               {calldata?.length > 0 ?
                 calldata?.map((row, index) => (
                   <TableRow hover key={index}>
-                    <TableCell align="center">
-                      <Typography>{row?.call_id}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography>{row?.custom_analysis_data?.reason || 'No reason'}</Typography>
-                    </TableCell>
                     <TableCell>
                       <Stack>
                         <Typography>{new Date(row.start_timestamp).toLocaleString()}</Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          {formatDuration(row?.duration_ms)} min
-                        </Typography>
+                         <Typography>{new Date(row.end_timestamp).toLocaleString()}</Typography>
                       </Stack>
                     </TableCell>
                     <TableCell align="center">
                       <Typography>{formatDuration(row?.duration_ms)} min</Typography>
                     </TableCell>
+                  
+                    <TableCell>
+                   <Tooltip title={row?.custom_analysis_data?.reason || 'No reason'}>
+  <Typography>
+    {(row?.custom_analysis_data?.reason || 'No reason').length > 40
+      ? `${row.custom_analysis_data.reason.slice(0, 40)}...`
+      : row.custom_analysis_data.reason || 'No reason'}
+  </Typography>
+</Tooltip>
+
+                    </TableCell>
+                    
+                    
                     <TableCell align="center">
                       <Chip size="small" color="info" label={row?.custom_analysis_data?.lead_type || 'N/A'} />
+                    </TableCell>
+                      <TableCell align="center">
+                      <Typography>{row?.user_sentiment}</Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Chip size="small" color="primary" label={row?.call_type || 'N/A'} />
@@ -122,14 +199,44 @@ export default function TransactionHistoryCard({ agentId }) {
                             <Eye />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Play Recording">
-                          <IconButton color="primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" style={{ fill: 'currentColor' }}>
-                              <path d="M0 0h24v24H0z" fill="none" />
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          </IconButton>
-                        </Tooltip>
+                    <Stack direction="row" spacing={1}>
+  {/* Play/Pause Button */}
+  <Tooltip title={playingCallId === row.call_id ? "Pause Recording" : "Play Recording"}>
+    <IconButton
+      color="primary"
+      onClick={() => handlePlayPauseRecording(row.recording_url, row.call_id)}
+    >
+      {
+        playingCallId === row.call_id ? (
+          // Pause Icon
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" style={{ fill: 'currentColor' }}>
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+          </svg>
+        ) : (
+          // Play Icon
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" style={{ fill: 'currentColor' }}>
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )
+      }
+    </IconButton>
+  </Tooltip>
+
+  {/* Open in New Tab */}
+  <Tooltip title="Play in New Tab">
+    <a href={row.recording_url} target="_blank" rel="noopener noreferrer">
+      <IconButton color="secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" style={{ fill: 'currentColor' }}>
+          <path d="M0 0h24v24H0z" fill="none" />
+          <path d="M14 2v2h3.59L10 11.59 11.41 13 19 5.41V9h2V2zM5 5v14h14v-6h-2v4H7V7h4V5H5z" />
+        </svg>
+      </IconButton>
+    </a>
+  </Tooltip>
+</Stack>
+
                       </Stack>
                     </TableCell>
                   </TableRow>

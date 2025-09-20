@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from 'components/@extended/IconButton';
 import MoreIcon from 'components/@extended/MoreIcon';
 import MainCard from 'components/MainCard';
+import { useRouter } from 'next/navigation';
 
 // assets
 import { Add } from '@wandersonalwes/iconsax-react';
@@ -27,6 +28,7 @@ interface cardProps {
   img: string;
   percentage: number;
   money: number;
+  assignedMinutes: number;
 }
 
 type Agent = {
@@ -34,6 +36,7 @@ type Agent = {
   name: string;
   status: string;
   callCount: number;
+  assignedMinutes: number;
 };
 
 
@@ -46,7 +49,7 @@ type Agent = {
 
 // ===========================|| MONEY SPENT - CARD ||=========================== //
 
-function SpentCard({ name, img, percentage, money }: cardProps) {
+function SpentCard({ name, img, percentage, money,assignedMinutes }: cardProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -95,6 +98,10 @@ function SpentCard({ name, img, percentage, money }: cardProps) {
               <Typography variant="body2">Used {percentage}%</Typography>
               <Typography variant="subtitle2">{money} Mins Left</Typography>
             </Stack>
+            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="body2">Agent Assigned  </Typography>
+              <Typography variant="subtitle2">{assignedMinutes} Mins</Typography>
+          </Stack>
           </Stack>
         </MainCard>
       </Stack>
@@ -105,6 +112,8 @@ function SpentCard({ name, img, percentage, money }: cardProps) {
 
 
 export default function AgentDetailCard({ agents }: { agents: Agent[] }) {
+const router = useRouter();
+  
   return (
     <MainCard>
       <Stack sx={{ gap: 2.5 }}>
@@ -112,26 +121,32 @@ export default function AgentDetailCard({ agents }: { agents: Agent[] }) {
           direction={{ xs: 'column', sm: 'row' }}
           sx={{ gap: 1, alignItems: { xs: 'start', sm: 'center' }, justifyContent: 'space-between' }}
         >
-          <Typography variant="h5">Where your minutes go ?</Typography>
+          <Typography variant="h5">Agents Overview</Typography>
         </Stack>
 
         <Grid container spacing={1.5}>
         {agents?.map((agent) => {
             // convert seconds → minutes
-            const planMinutes = Math.floor(agent.planMinutes / 60);
-            const minsLeft = Math.floor(agent.mins_left / 60);
+            const planMinutes = Math.floor(agent?.planMinutes / 60);
+            const minsLeft = Math.floor(agent?.mins_left / 60);
             const leftMinutes=planMinutes-minsLeft;
             const percentage =
                 planMinutes > 0 ? Math.round((leftMinutes / planMinutes) * 100) : 0;
 
             return (
                 <Grid key={agent.agent_id} size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <div
+                  onClick={() =>router.push(`/build/agents/agentdetails/${agent.agent_id}`)}
+                  className="cursor-pointer"
+                >
                 <SpentCard
                     img={agent.avatar}
                     name={agent.agentName}
                     percentage={percentage}
-                    money={planMinutes} // minutes me bhej diya
+                    money={minsLeft} // minutes me bhej diya
+                    assignedMinutes={planMinutes}
                 />
+                </div>
                 </Grid>
             );
             })}

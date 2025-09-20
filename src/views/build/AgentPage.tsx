@@ -422,12 +422,12 @@ export default function TransactionHistoryCard() {
                     </TableCell>
                     {/* Mins Assigned */}
                     <TableCell align="center">
-                      <Typography>{row.planMinutes}</Typography>
+                      <Typography>{Math.floor(row.planMinutes / 60)}</Typography>
                     </TableCell>
 
                     {/* Mins Remaining */}
                     <TableCell align="center">
-                      <Typography>{row.mins_left}</Typography>
+                      <Typography>{Math.floor(row.mins_left / 60)}</Typography>
                     </TableCell>
 
                     {/* Status */}
@@ -533,5 +533,6 @@ export default function TransactionHistoryCard() {
         </Alert>
       </Snackbar>
     </>
+
   )
 }
