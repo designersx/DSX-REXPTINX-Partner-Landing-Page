@@ -118,14 +118,14 @@ export default function AgentDetailCard({ agents }: { agents: Agent[] }) {
           direction={{ xs: 'column', sm: 'row' }}
           sx={{ gap: 1, alignItems: { xs: 'start', sm: 'center' }, justifyContent: 'space-between' }}
         >
-          <Typography variant="h5">Where your minutes go ?</Typography>
+          <Typography variant="h5">Agents Overview</Typography>
         </Stack>
 
         <Grid container spacing={1.5}>
         {agents?.map((agent) => {
             // convert seconds → minutes
-            const planMinutes = Math.floor(agent.planMinutes / 60);
-            const minsLeft = Math.floor(agent.mins_left / 60);
+            const planMinutes = Math.floor(agent?.planMinutes / 60);
+            const minsLeft = Math.floor(agent?.mins_left / 60);
             const leftMinutes=planMinutes-minsLeft;
             const percentage =
                 planMinutes > 0 ? Math.round((leftMinutes / planMinutes) * 100) : 0;
