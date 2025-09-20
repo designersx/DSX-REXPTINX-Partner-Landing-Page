@@ -2,7 +2,7 @@
 
 // assets
 import { DocumentCode2 } from '@wandersonalwes/iconsax-react';
-
+import DashboardIcon from '@mui/icons-material/Dashboard';
 // types
 import { NavItemType } from 'types/menu';
 
@@ -18,7 +18,7 @@ const samplePage: NavItemType = {
   title: 'Dashboard',
   type: 'group',
   url: '/sample-page',
-  icon: icons.samplePage
+  icon: DashboardIcon,
 };
 
 export default samplePage;
