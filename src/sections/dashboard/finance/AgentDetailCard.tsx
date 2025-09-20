@@ -27,6 +27,7 @@ interface cardProps {
   img: string;
   percentage: number;
   money: number;
+  assignedMinutes: number;
 }
 
 type Agent = {
@@ -34,6 +35,7 @@ type Agent = {
   name: string;
   status: string;
   callCount: number;
+  assignedMinutes: number;
 };
 
 
@@ -46,7 +48,7 @@ type Agent = {
 
 // ===========================|| MONEY SPENT - CARD ||=========================== //
 
-function SpentCard({ name, img, percentage, money }: cardProps) {
+function SpentCard({ name, img, percentage, money,assignedMinutes }: cardProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -95,6 +97,10 @@ function SpentCard({ name, img, percentage, money }: cardProps) {
               <Typography variant="body2">Used {percentage}%</Typography>
               <Typography variant="subtitle2">{money} Mins Left</Typography>
             </Stack>
+            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="body2">Agent Assigned  </Typography>
+              <Typography variant="subtitle2">{assignedMinutes} Mins</Typography>
+          </Stack>
           </Stack>
         </MainCard>
       </Stack>
@@ -130,7 +136,8 @@ export default function AgentDetailCard({ agents }: { agents: Agent[] }) {
                     img={agent.avatar}
                     name={agent.agentName}
                     percentage={percentage}
-                    money={planMinutes} // minutes me bhej diya
+                    money={minsLeft} // minutes me bhej diya
+                    assignedMinutes={planMinutes}
                 />
                 </Grid>
             );

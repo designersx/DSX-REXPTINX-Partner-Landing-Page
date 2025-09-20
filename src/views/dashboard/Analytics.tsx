@@ -259,7 +259,7 @@ export default function DashboardFinance() {
 
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <TransactionCard
-              title="Used Bulk Minutes"
+              title="Assigned Bulk Minutes"
               caption="Enterprise Data"
               color={theme.palette.success.main}
               data={[180, 110, 50, 80, 100, 199, 50]}
@@ -269,7 +269,7 @@ export default function DashboardFinance() {
 
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <TransactionCard
-              title="Left Bulk Minutes"
+              title="Unassigned Bulk Minutes"
               caption="Enterprise Data"
               color={theme.palette.error.main}
               data={[70, 199, 130, 140, 80, 20, 70]}
