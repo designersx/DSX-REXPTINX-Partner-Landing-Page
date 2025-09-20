@@ -24,20 +24,21 @@ const Transition = React.forwardRef(function Transition(
 
 export default function AgentGeneralInfoModal({ open, onClose, onSubmit }) {
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="lg"
-      fullWidth
-      TransitionComponent={Transition}
-      PaperProps={{
-        sx: {
-          height: '90vh',
-          borderRadius: 3,
-          overflow: 'hidden',
-        },
-      }}
-    >
+  <Dialog
+  open={open}
+  onClose={onClose}
+  fullWidth
+  TransitionComponent={Transition}
+  PaperProps={{
+    sx: {
+      height: '80vh',
+      borderRadius: 3,
+      overflow: 'hidden',
+      maxWidth: '800px',  
+      width: '100%',       
+    },
+  }}
+>
       <DialogContent sx={{ p: 4, width:'130%',height: '100%', display: 'flex', flexDirection: 'column' }}>
         <AgentGeneralInfo
           open={open}
